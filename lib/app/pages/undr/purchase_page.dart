@@ -153,7 +153,7 @@ class PurchasePage extends GetView<PurchaseController> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Assets.imagesPhGem.iv(width: 16.w),
+                          Assets.imagesIcGem.iv(width: 16.w),
                           5.horizontalSpace,
                           Text(
                             "+${sku.number}",

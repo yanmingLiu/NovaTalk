@@ -550,7 +550,7 @@ class PictureView extends GetView<PictureController> {
             ),
           ),
           16.horizontalSpace,
-          Assets.imagesPhGem.iv(width: 20.w),
+          Assets.imagesIcGem.iv(width: 20.w),
           3.horizontalSpace,
           Obx(() {
             final count = controller.count.value;

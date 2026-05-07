@@ -1,6 +1,5 @@
 import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,7 +9,6 @@ import 'package:novatalk/app/utils/api_svc.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/utils/clo_util.dart';
 import 'package:novatalk/app/utils/common_utils.dart';
-import 'package:novatalk/app/utils/device_info.dart';
 import 'package:novatalk/app/utils/purchase_helper.dart';
 import 'package:novatalk/app/utils/storage_util.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
@@ -153,11 +151,6 @@ class RolesController extends GetxController {
     });
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
   Future loadTags() async {
     var data = await ApiSvc.getRoleTags();
     if (data != null) {
@@ -268,7 +261,7 @@ class RolesController extends GetxController {
               child: isVip
                   ? sh
                   : Text.rich(
-                    textAlign:  TextAlign.center,
+                      textAlign: TextAlign.center,
                       TextSpan(
                         children: buildTextSpans(
                           origin: LocaleKeys.pro50.tr,
@@ -276,7 +269,7 @@ class RolesController extends GetxController {
                           style: tTheme.labelLarge?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
-                            fontSize: 16.sp
+                            fontSize: 16.sp,
                           ),
                           buildTargetTextSpan:
                               (String target, TextStyle? style, int index) {
@@ -284,14 +277,16 @@ class RolesController extends GetxController {
                                   return TextSpan(
                                     text: "+$target",
                                     style: style?.copyWith(
-                                      color:  cTheme.scrim,
+                                      color: cTheme.scrim,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 20.sp,
                                     ),
                                   );
                                 }
                                 return WidgetSpan(
-                                  child: Assets.imagesPhGem.iv(height: 22.w).marginOnly(bottom: 4.h),
+                                  child: Assets.imagesIcGem
+                                      .iv(height: 22.w)
+                                      .marginOnly(bottom: 4.h),
                                   alignment: PlaceholderAlignment.middle,
                                 );
                               },
@@ -302,7 +297,7 @@ class RolesController extends GetxController {
             buildTheme3Btn(
               alignment: Alignment.center,
               margin: EdgeInsets.symmetric(horizontal: 68.w),
-              title: isVip?LocaleKeys.claimNow.tr: LocaleKeys.goPro.tr,
+              title: isVip ? LocaleKeys.claimNow.tr : LocaleKeys.goPro.tr,
               onTap: () {
                 if (isVip) {
                   onTopCollect();
@@ -374,12 +369,15 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
   bool? genVideo;
   bool? genImg;
   bool? dress;
+  bool? forYou;
+  bool enableHomeCall = true;
   String? name;
   List<int> tagIds = [];
 
   var easyRefreshController = EasyRefreshController();
 
   Worker? filter;
+  Worker? follow;
 
   PageLoadRoleController({
     this.rendStyl,
@@ -387,6 +385,8 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
     this.genVideo,
     this.genImg,
     this.dress,
+    this.forYou,
+    this.enableHomeCall = true,
     this.name,
     this.tagIds = const [],
   });
@@ -394,7 +394,9 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
   @override
   onRefresh() async {
     await super.onRefresh();
-    Get.find<HomeController>().onCall(pageData);
+    if (enableHomeCall) {
+      Get.find<HomeController>().onCall(pageData);
+    }
   }
 
   Future<void> onCollect(RoleRecords role) async {
@@ -442,6 +444,7 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
       genVideo: genVideo,
       tags: tagIds,
       dress: dress,
+      forYou: forYou,
       name: name,
     );
     if (videoChat == true) {}
@@ -486,7 +489,7 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
         SmartDialog.dismiss();
       });
     }
-    ever(rolesController!.followEvent, (even) {
+    follow = ever(rolesController!.followEvent, (even) {
       try {
         final e = even.$1;
         final id = even.$2;
@@ -496,12 +499,21 @@ class PageLoadRoleController with MxPageData<RoleRecords> {
           pageData[index].collect = e == FollowEvent.follow;
         }
         rolesController.update();
-      } catch (e) {}
+      } catch (e) {
+        goPrint(e.toString());
+      }
     });
   }
 
   void onClose() {
     filter?.dispose();
+    follow?.dispose();
+  }
+
+  @override
+  void dispose() {
+    onClose();
+    super.dispose();
   }
 }
 

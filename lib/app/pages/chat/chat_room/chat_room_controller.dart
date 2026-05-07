@@ -659,7 +659,7 @@ class ChatRoomController extends GetxController
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Assets.imagesPhGem.iv(width: 24.w),
+            Assets.imagesIcGem.iv(width: 24.w),
             5.horizontalSpace,
             Text(
               "+$rewards",

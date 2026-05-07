@@ -78,7 +78,7 @@ class ChatLevel extends StatelessWidget {
                   ),
                 ),
                 ex,
-                Assets.imagesPhGem.iv(width: 15.w).paddingOnly(top: 3.h),
+                Assets.imagesIcGem.iv(width: 15.w).paddingOnly(top: 3.h),
                 const SizedBox(width: 4),
                 Text(
                   rewards,

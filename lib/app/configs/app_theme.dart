@@ -55,7 +55,7 @@ class Theme1 {
     onSecondary: primary.withValues(alpha: 0.2),
     secondaryFixed: primary.withValues(alpha: 0.1),
     error: Color(0xffF04A4C),
-    primaryFixed: Color(0x593A665F),
+    primaryFixed: Colors.black,
     primaryFixedDim: Color(0x668EF8E7),
     onError: Colors.red,
     surface: Colors.white,
@@ -112,11 +112,11 @@ Widget buildDefaultBg({
   Color? bgColor,
 }) {
   return Container(
-    color: bgColor ?? cTheme.surface,
+    color: bgColor ?? cTheme.primaryFixed,
     child: Stack(
       alignment: Alignment.topCenter,
       children: [
-        Assets.imagesBkgCommon.iv(
+        Assets.imagesBgCommon.iv(
           width: Get.width,
           height: Get.height / 2.8,
           fit: BoxFit.fill,
@@ -496,7 +496,7 @@ Widget buildGemWidget() {
           padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 2.h),
           child: Row(
             children: [
-              Assets.imagesPhGem.iv(width: 20.w),
+              Assets.imagesIcGem.iv(width: 20.w),
               4.horizontalSpace,
               AppUser.inst.balance.value.tv(
                 style: tTheme.bodySmall?.copyWith(color: Colors.black),

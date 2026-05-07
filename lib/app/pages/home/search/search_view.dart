@@ -230,24 +230,26 @@ class _SearchRoleContentWidgetState extends RoleContentWidgetState {
                   if (item.tags != null || item.tags?.isNotEmpty == true)
                     buildTags(item),
                   3.verticalSpace,
-                  (item.intro ?? item.aboutMe).tv(
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ).marginOnly(right: 15.w),
+                  (item.intro ?? item.aboutMe)
+                      .tv(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.black,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      )
+                      .marginOnly(right: 15.w),
                 ],
               ),
             ),
             Container(
               width: 100.w,
               height: 100.w,
-              margin: EdgeInsets.only(left:8.w ),
+              margin: EdgeInsets.only(left: 8.w),
               child: Stack(
-                alignment:  Alignment.bottomCenter,
+                alignment: Alignment.bottomCenter,
                 clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(

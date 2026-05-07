@@ -156,7 +156,7 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Assets.imagesPhGem.iv(width: 20.w),
+                Assets.imagesIcGem.iv(width: 20.w),
                 4.horizontalSpace,
                 "+$gemNum".tv(
                   style: tTheme.bodyLarge!.copyWith(

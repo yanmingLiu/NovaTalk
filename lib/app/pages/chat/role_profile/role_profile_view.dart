@@ -119,8 +119,6 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
     );
   }
 
-
-
   Future _follow() async {
     final id = role.id;
     if (id == null) {
@@ -245,7 +243,7 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
                                   18.horizontalSpace,
                                   Row(
                                     children: [
-                                      Assets.imagesPhLike.iv(width: 16.w),
+                                      Assets.imagesIcLike.iv(width: 16.w),
                                       10.horizontalSpace,
                                       Column(
                                         crossAxisAlignment:
@@ -317,8 +315,9 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
                                         8.horizontalSpace,
                                         if (!role.age.isVoid)
                                           SizedBox(
-                                              width: 27.w,
-                                              child: buildAgeWidget(role.age)).marginOnly(top: 3.h),
+                                            width: 27.w,
+                                            child: buildAgeWidget(role.age),
+                                          ).marginOnly(top: 3.h),
                                       ],
                                     ),
                                   ),
@@ -348,8 +347,8 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
                                   //                 ),
                                   //               )
                                   //             : (role.collect == true
-                                  //                       ? Assets.imagesPhLike
-                                  //                       : Assets.imagesPhLike2)
+                                  //                       ? Assets.imagesIcLike
+                                  //                       : Assets.imagesIcLike2)
                                   //                   .iv(width: 20.w),
                                   //         const SizedBox(width: 8),
                                   //         Text(
@@ -579,7 +578,7 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Assets.imagesPhGem.iv(
+                                          Assets.imagesIcGem.iv(
                                             width: 20,
                                             height: 20,
                                           ),
@@ -742,6 +741,7 @@ Widget buildAgeWidget(int? age) {
     ),
   );
 }
+
 void report() {
   void request() async {
     Get.closeBottomSheet();

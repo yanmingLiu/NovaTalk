@@ -1,14 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:novatalk/app/configs/app_theme.dart';
+import 'package:novatalk/app/entities/conversation_entity.dart';
+import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/widgets/keep_alive_wrapper.dart';
 import 'package:novatalk/app/widgets/overall_build_widget.dart';
 
 import '../../../generated/assets.dart';
 import '../../../generated/locales.g.dart';
+import '../../configs/constans.dart';
+import '../../utils/common_utils.dart';
 import '../../utils/time_util.dart';
 import '../../widgets/common_widget.dart';
 import '../home/home_view.dart';
@@ -21,52 +26,145 @@ class ChatView extends GetBuildView<ChatController> {
 
   @override
   Widget builder(BuildContext context) {
-    return Scaffold(
-      body: buildDefaultBg(
-        child: SafeArea(
-          child: DefaultTabController(
-            length: 2,
-            animationDuration: const Duration(milliseconds: 50),
-            child: Column(
-              children: [
-                // buildHomeAppBar(
-                //   titleIcon: Assets.imagesIgChat,
-                //   actions: [buildGemWidget().marginOnly(right:  16.w)],
-                // ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: Get.width * 0.2),
-                  width: Get.width,
-                  child: buildHomeTitleTabBar(
-                    isScrollable: false,
-                    tabAlignment: null,
-                    tabs: [
-                      Tab(text: LocaleKeys.contactedBefore.tr),
-                      Tab(text: LocaleKeys.favorites.tr),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      KeepAliveWrapper(
-                        child: SessionListView(
-                          controller: controller.sessionListController,
-                        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            buildDefaultBg(),
+            SafeArea(
+              bottom: false,
+              child: DefaultTabController(
+                length: 2,
+                animationDuration: const Duration(milliseconds: 180),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _ChatHeader(),
+                    20.verticalSpace,
+                    _ChatTabs(
+                      onTap: (index) {
+                        controller.setTabIndex(index);
+                      },
+                    ),
+                    16.verticalSpace,
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          KeepAliveWrapper(
+                            child: SessionListView(
+                              controller: controller.sessionListController,
+                            ),
+                          ),
+                          KeepAliveWrapper(
+                            child: SessionListView(
+                              controller: controller.likedSessionListController,
+                            ),
+                          ),
+                        ],
                       ),
-                      KeepAliveWrapper(
-                        child: SessionListView(
-                          controller: controller.likedSessionListController,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
+  }
+}
+
+class _ChatHeader extends StatelessWidget {
+  const _ChatHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 7.h),
+      child: Row(
+        children: [
+          const HomeGemPill(),
+          20.horizontalSpace,
+          Obx(
+            () => AppUser.inst.isVip.value
+                ? sh
+                : TapBox(
+                    onTap: () {
+                      pushVip(VipFrom.homevip);
+                    },
+                    child: const HomeVipEntry(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatTabs extends StatelessWidget {
+  const _ChatTabs({required this.onTap});
+
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 22.h,
+      child: TabBar(
+        onTap: onTap,
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        dividerColor: Colors.transparent,
+        indicatorColor: Colors.transparent,
+        indicator: _ChatTabIndicator(),
+        indicatorSize: TabBarIndicatorSize.label,
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white.withValues(alpha: 0.70),
+        labelStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w400,
+        ),
+        labelPadding: EdgeInsets.only(left: 16.w, right: 35.w),
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
+        tabs: [
+          Tab(height: 22.h, text: LocaleKeys.contactedBefore.tr),
+          Tab(height: 22.h, text: LocaleKeys.favorites.tr),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatTabIndicator extends Decoration {
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _ChatTabIndicatorPainter();
+  }
+}
+
+class _ChatTabIndicatorPainter extends BoxPainter {
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final size = Size(12.w, 12.w);
+    final rect = Rect.fromLTWH(
+      offset.dx,
+      offset.dy + (configuration.size?.height ?? 22.h) - size.height - 1.h,
+      size.width,
+      size.height,
+    );
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(4.r));
+    final paint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFF96F7),
+          const Color(0xFFFF96F7).withValues(alpha: 0),
+        ],
+      ).createShader(rect);
+    canvas.drawRRect(rrect, paint);
   }
 }
 
@@ -100,82 +198,121 @@ class _SessionListViewState extends State<SessionListView> {
           return ListView.separated(
             physics: physics,
             shrinkWrap: true,
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 22.h),
+            padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 108.h),
             separatorBuilder: (_, index) {
-              return const SizedBox(height: 20);
+              return 12.verticalSpace;
             },
             itemBuilder: (_, index) {
               final item = ctr.pageData[index];
               return InkWell(
                 onTap: () => ctr.onItemTap(item),
-                child: Container(
-                  height: 68.h,
-                  child: Row(
-                    children: [
-                      Stack(
-                        alignment: AlignmentGeometry.bottomRight,
-                        children: [
-                          ClipOval(
-                            child: item.avatar.iv(width: 68.w, height: 68.w),
-                          ),
-                          if (ctr.isLiked) buildLikeThemeBtn(),
-                        ],
-                      ),
-                      12.horizontalSpace,
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.title ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: tTheme.titleMedium!.copyWith(
-                                color: Colors.black,
-                              ),
-                            ),
-                            Expanded(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(minHeight: 36.h),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    item.lastMessage ?? '',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black.withValues(
-                                        alpha: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      12.horizontalSpace,
-                      if (item.updateTime != null)
-                        Text(
-                          TimeUtil.formatToday(item.updateTime!),
-                          style: tTheme.labelMedium!.copyWith(
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                borderRadius: BorderRadius.circular(20.r),
+                child: _SessionCard(item: item, showLike: ctr.isLiked),
               );
             },
             itemCount: ctr.pageData.length,
           );
         });
       },
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  const _SessionCard({required this.item, required this.showLike});
+
+  final ConversationRecords item;
+  final bool showLike;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 96.h,
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: Colors.black, width: 1.w),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.black, Color(0xFF21001E)],
+          stops: [0, 0.952],
+        ),
+      ),
+      child: Row(
+        children: [
+          ClipOval(
+            child: item.avatar.iv(width: 72.w, height: 72.w, fit: BoxFit.cover),
+          ),
+          12.horizontalSpace,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                (item.title ?? '').toString().tv(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                3.verticalSpace,
+                (item.lastMessage ?? '').toString().tv(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.40),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          12.horizontalSpace,
+          _SessionTrailing(item: item, showLike: showLike),
+        ],
+      ),
+    );
+  }
+}
+
+class _SessionTrailing extends StatelessWidget {
+  const _SessionTrailing({required this.item, required this.showLike});
+
+  final ConversationRecords item;
+  final bool showLike;
+
+  @override
+  Widget build(BuildContext context) {
+    final time = item.updateTime == null
+        ? ''
+        : TimeUtil.formatToday(item.updateTime!);
+    return SizedBox(
+      width: 34.w,
+      height: 60.h,
+      child: Column(
+        mainAxisAlignment: showLike
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          time.tv(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: const Color(0xFF797C7B),
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          if (showLike) Assets.imagesIcLike.iv(width: 20.w, height: 20.w),
+        ],
+      ),
     );
   }
 }
@@ -204,7 +341,7 @@ Widget buildLikeThemeBtn({
           ),
           color: Colors.black.withValues(alpha: 0.4),
         ),
-        child: contentWidget ?? Assets.imagesPhLike.iv(width: 12.w),
+        child: contentWidget ?? Assets.imagesIcLike.iv(width: 12.w),
       ),
     ),
   );

@@ -520,7 +520,7 @@ class VipView extends GetBuildView<VipController> {
                               ),
                             ),
                             3.horizontalSpace,
-                            Assets.imagesPhGem.iv(width: 21.w),
+                            Assets.imagesIcGem.iv(width: 21.w),
 
                           ],
                         )

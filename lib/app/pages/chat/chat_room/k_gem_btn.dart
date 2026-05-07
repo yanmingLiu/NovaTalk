@@ -34,7 +34,7 @@ class KGemBtn extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 4.h),
             child: Row(
               children: [
-                Assets.imagesPhGem.iv(width: 16),
+                Assets.imagesIcGem.iv(width: 16),
                 const SizedBox(width: 4),
                 text.tv(style: tTheme.titleLarge),
               ],

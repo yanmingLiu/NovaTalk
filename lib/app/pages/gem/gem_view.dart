@@ -118,7 +118,7 @@ class GemView extends GetBuildView<GemController> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Assets.imagesPhGem.iv(width: 25.w),
+              Assets.imagesIcGem.iv(width: 25.w),
               10.horizontalSpace,
               Obx(
                 ()=> AppUser.inst.balance.value.tv(
@@ -311,7 +311,7 @@ class GemView extends GetBuildView<GemController> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Assets.imagesPhGem.iv(width: 24.w),
+                Assets.imagesIcGem.iv(width: 24.w),
                 5.horizontalSpace,
                 price.tv(
                   style: tTheme.bodyLarge?.copyWith(color: Colors.black),

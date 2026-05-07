@@ -217,6 +217,7 @@ class LocaleKeys {
   static const orderVFailed = 'orderVFailed';
   static const favorites = 'favorites';
   static const viewCha = 'viewCha';
+  static const viewAll = 'viewAll';
   static const callRole = 'callRole';
   static const illegalDrugs = 'illegalDrugs';
   static const unwantedMsg = 'unwantedMsg';
@@ -544,5 +545,6 @@ class Locales {
     'topPhoto': 'Top Photo',
     'replyMode': 'Reply mode',
     'uHits4': '4.Does not support multiple people photos.',
+    'viewAll': 'View All',
   };
 }

@@ -93,12 +93,12 @@ class SplashController extends GetxController with SubPacker {
     EasyRefresh.defaultHeaderBuilder = () => ClassicHeader(
       showMessage: false,
       showText: false,
-      iconTheme: IconThemeData(color: Colors.black),
+      iconTheme: IconThemeData(color: Colors.white),
     );
     EasyRefresh.defaultFooterBuilder = () => const ClassicFooter(
       showMessage: false,
       showText: false,
-      iconTheme: IconThemeData(color: Colors.black),
+      iconTheme: IconThemeData(color: Colors.white),
     );
   }
 

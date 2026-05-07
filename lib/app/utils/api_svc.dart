@@ -152,6 +152,7 @@ class ApiSvc {
     bool? genVideo,
     bool? dress,
     List<int>? tags,
+    bool? forYou,
   }) async {
     try {
       var data = {'page': page, 'size': size, 'platform': AppConfig.platform};
@@ -175,6 +176,9 @@ class ApiSvc {
       }
       if (tags != null && tags.isNotEmpty) {
         data['tags'] = tags;
+      }
+      if (forYou != null) {
+        data['forYou'] = forYou;
       }
       var res = await DioHelper.dio.post(
         AppDeploy.roleList,
@@ -1247,19 +1251,19 @@ class ApiSvc {
   }
 
   static Future<bool> getGenImg(String taskId) async {
-      final res = await DioHelper.dio.get(
-        AppDeploy.getGenImg,
-        queryParameters: {'id': taskId},
-      );
-      final result = ApiResponse.fromJson(
-        res.data,
-        decodeJson: GenResultBean.fromJson,
-      );
-      if(result.code!=200){
-        throw Exception(result.message);
-      }
-      return result.success == true &&
-          result.data?.imgs != null &&
-          result.data!.imgs!.length > 0;
+    final res = await DioHelper.dio.get(
+      AppDeploy.getGenImg,
+      queryParameters: {'id': taskId},
+    );
+    final result = ApiResponse.fromJson(
+      res.data,
+      decodeJson: GenResultBean.fromJson,
+    );
+    if (result.code != 200) {
+      throw Exception(result.message);
+    }
+    return result.success == true &&
+        result.data?.imgs != null &&
+        result.data!.imgs!.length > 0;
   }
 }

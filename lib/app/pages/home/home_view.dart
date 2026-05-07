@@ -13,7 +13,6 @@ import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
 import 'package:novatalk/app/pages/chat/chat_controller.dart';
 import 'package:novatalk/app/pages/chat/chat_view.dart';
-import 'package:novatalk/app/utils/ad/ad_loader.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/utils/log/log_event.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
@@ -28,12 +27,13 @@ import '../../utils/clo_util.dart';
 import '../../utils/common_utils.dart';
 import '../../utils/device_info.dart';
 import '../../widgets/gradient_bound_painter.dart';
-import '../../widgets/keep_alive_wrapper.dart';
 import '../setting/setting_view.dart';
 import '../undr/ai_photo/ai_photo_page.dart';
 import 'home_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_refresh/easy_refresh.dart';
+
+part 'home_discover_view.dart';
 
 class HomeView extends GetBuildView<HomeController> {
   const HomeView({super.key});
@@ -41,11 +41,13 @@ class HomeView extends GetBuildView<HomeController> {
   @override
   Widget builder(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBody: true,
       body: buildDefaultBg(
         child: IndexedStack(
           index: controller.currentTabIndex,
           children: [
-            const RolesView(),
+            const HomeDiscoverView(),
             CloUtil.isCloB ? const AiPhotoPage() : const PictureView(),
             const ChatView(),
             const SettingView(),
@@ -70,32 +72,32 @@ class HomeView extends GetBuildView<HomeController> {
     }
 
     final msgTab = buildBottomNavigationBarItem(
-      Assets.imagesPhHomeMsg2,
-      Assets.imagesPhHomeMsg,
+      Assets.imagesPhMainMsg,
+      Assets.imagesPhMainMsg2,
     );
     final discoverTab = buildBottomNavigationBarItem(
-      Assets.imagesPhHomeDiscover2,
-      Assets.imagesPhHomeDiscover,
+      Assets.imagesPhMainDiscover,
+      Assets.imagesPhMainDiscover2,
     );
     final navigationItems = [
       discoverTab,
       buildBottomNavigationBarItem(
-        Assets.imagesPhHomePicture2,
-        Assets.imagesPhHomePicture,
+        Assets.imagesPhMainCreate,
+        Assets.imagesPhMainCreate2,
       ),
       msgTab,
       buildBottomNavigationBarItem(
-        Assets.imagesPhHomeMe2,
-        Assets.imagesPhHomeMe,
+        Assets.imagesPhMainMe,
+        Assets.imagesPhMainMe2,
       ),
     ];
     return ClipRRect(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(24.r),
-        topRight: Radius.circular(24.r),
+        topLeft: Radius.circular(12.r),
+        topRight: Radius.circular(12.r),
       ),
       child: BottomNavigationBar(
-        backgroundColor: Color(0xff1C1A1D),
+        backgroundColor: Colors.black,
         showSelectedLabels: false,
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,
@@ -121,147 +123,6 @@ class HomeView extends GetBuildView<HomeController> {
         },
         items: navigationItems,
       ),
-    );
-  }
-}
-
-class RolesView extends GetBuildView<RolesController> {
-  const RolesView({super.key});
-
-  Widget buildBtn({
-    Widget? child,
-    double? vertical,
-    double? horizontal,
-    onTap,
-  }) {
-    return TapBox(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontal ?? 8.w,
-          vertical: vertical ?? 6.h,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(30.r),
-        ),
-        child: child,
-      ),
-    );
-  }
-
-  @override
-  Widget builder(BuildContext context) {
-    return Scaffold(
-      extendBody: false,
-      body: buildDefaultBg(
-        child: Column(
-          children: [
-            buildAppBar(),
-            Row(
-              children: [
-                Expanded(
-                  child: TapBox(
-                    onTap: () {
-                      Get.toNamed(Routes.SEARCH);
-                    },
-                    child: IgnorePointer(
-                      child: buildTopSearchTextField(enabled: false),
-                    ).marginOnly(left: 12.w, right: 12.w),
-                  ),
-                ),
-                if (CloUtil.isCloB)
-                  TapBox(
-                    onTap: controller.showFilter,
-                    child: Assets.imagesPhFilter.iv(width: 40.w),
-                  ).marginOnly(right: 12.w),
-              ],
-            ),
-            Expanded(
-              child: DefaultTabController(
-                length: controller.tabs.length,
-                animationDuration: const Duration(milliseconds: 50),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    buildHomeTabBar(
-                      padding: EdgeInsets.symmetric(horizontal: 1.w),
-                      // labelPadding:  EdgeInsets.only(right: 16.w),
-                      tabs: controller.tabs
-                          .map((v) => Tab(text: v.$1.tr))
-                          .toList(),
-                      onTap: (index) {
-                        if (controller.tabs[index].$1 == LocaleKeys.videoChat) {
-                          logEvent("c_videochat");
-                        }
-                      },
-                    ).marginOnly(top: 15.h, bottom: 6.h),
-                    Expanded(
-                      child: TabBarView(
-                        children: controller.tabs.map((v) {
-                          return KeepAliveWrapper(
-                            child: RoleContentWidget(type: v.$2, byHome: true),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget buildAppBar() {
-    Widget buildBtnGroup({Widget? child}) {
-      return Container(
-        padding: EdgeInsets.all(3.r),
-        decoration: BoxDecoration(
-          color: cTheme.primary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: child,
-      );
-    }
-
-    return AppBar(
-      leadingWidth: 120.w,
-      centerTitle: true,
-      toolbarHeight: 50.h,
-      leading: Stack(
-        alignment: AlignmentGeometry.centerLeft,
-        children: [
-          Positioned(
-            left: -12.w,
-            child: DefaultTabController(
-              length: 2,
-              child: buildHomeTitleTabBar(
-                tabs: [Tab(text: LocaleKeys.explore.tr)],
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        buildGemWidget(),
-
-        11.horizontalSpace,
-        Obx(
-          () => AppUser.inst.isVip.value
-              ? sh
-              : TapBox(
-                  onTap: () {
-                    pushVip(VipFrom.homevip);
-                  },
-                  child: buildBtnGroup(
-                    child: Assets.imagesPhVip.iv(width: 28.w),
-                  ),
-                ).marginOnly(right: 12.w),
-        ),
-      ],
     );
   }
 }
@@ -388,7 +249,7 @@ class RoleContentWidgetState extends State<RoleContentWidget> {
           // }
           return RoleItem(
             role: item,
-            onCollect: controller.onCollect,
+            onCollect: (v){},
             onTap: (role) {
               logic.onItemTap(role, widget.type);
             },
@@ -641,7 +502,7 @@ class FavoredButton extends StatelessWidget {
               children: [
                 '${role.likes ?? 0}'.tv(style: tTheme.bodySmall),
                 const SizedBox(width: 3),
-                (isCollect ? Assets.imagesPhLike : Assets.imagesPhLike2).iv(
+                (isCollect ? Assets.imagesIcLike : Assets.imagesIcLike2).iv(
                   width: 10.w,
                 ),
               ],
@@ -693,7 +554,7 @@ Widget buildTopSearchTextField({
             width: 22.w,
             height: 15.h,
             alignment: Alignment.centerRight,
-            child: Assets.imagesPhSearch.iv(width: 13.w),
+            child: Assets.imagesIcSearch.iv(width: 13.w),
           ),
         ),
         focusedBorder: border,

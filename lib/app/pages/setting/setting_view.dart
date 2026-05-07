@@ -390,7 +390,7 @@ class SettingView extends GetBuildView<SettingController> {
                   8.horizontalSpace,
                   Transform.rotate(
                     angle: 180 * pi / 95,
-                    child: Assets.imagesPhVip.iv(width: 32.w),
+                    child: Assets.imagesIcVip.iv(width: 32.w),
                   ),
                 ],
               ),
@@ -440,7 +440,7 @@ class SettingView extends GetBuildView<SettingController> {
               buildLikeThemeBtn(
                 padding: EdgeInsets.all(3.r),
                 shape: BoxShape.circle,
-                contentWidget: Assets.imagesPhVip.iv(width: 14.w),
+                contentWidget: Assets.imagesIcVip.iv(width: 14.w),
               ),
           ],
         ),
