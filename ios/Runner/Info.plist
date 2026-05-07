@@ -45,5 +45,25 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false />
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Microphone access is used so you can record audio and use voice chat features in the app.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Photo library access lets you select and upload images while using chat features in the
+        app.
+    </string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Speech recognition is used to turn your spoken words into text when you use voice input
+        in chat.
+    </string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>Allow tracking across apps and websites so we can improve content relevance and
+        personalize recommendations in the app.
+    </string>
+
+
 </dict>
 </plist>

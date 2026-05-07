@@ -14,7 +14,7 @@ import '../utils/cryptography.dart';
 import 'package:convert/convert.dart';
 import 'package:encrypt/encrypt.dart' ;
 
-const bool isAppDebug = true;
+const bool isAppDebug = false;
 bool get isConfuse => !isAppDebug && kReleaseMode;
 
 class AppConfig {
