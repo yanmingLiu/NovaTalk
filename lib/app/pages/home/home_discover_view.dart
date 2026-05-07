@@ -239,7 +239,6 @@ class _HomeDiscoverViewState extends State<HomeDiscoverView> {
                   ),
                   child: _FeaturedRoleCard(
                     role: role,
-                    onCollect: _forYouController.onCollect,
                     onTap: () {
                       logic.onItemTap(role, DiscoverListType.all);
                     },
@@ -476,7 +475,6 @@ class _HomeCategorySection extends StatelessWidget {
                     final role = roles[index];
                     return _CompactRoleCard(
                       role: role,
-                      onCollect: section.controller.onCollect,
                       onTap: () => onItemTap(role),
                     );
                   },
@@ -493,14 +491,9 @@ class _HomeCategorySection extends StatelessWidget {
 }
 
 class _FeaturedRoleCard extends StatelessWidget {
-  const _FeaturedRoleCard({
-    required this.role,
-    required this.onCollect,
-    required this.onTap,
-  });
+  const _FeaturedRoleCard({required this.role, required this.onTap});
 
   final RoleRecords role;
-  final void Function(RoleRecords role) onCollect;
   final Function onTap;
 
   @override
@@ -530,7 +523,7 @@ class _FeaturedRoleCard extends StatelessWidget {
                 Positioned(
                   top: 8.h,
                   right: 8.w,
-                  child: _LikePill(role: role, onCollect: onCollect),
+                  child: _LikePill(role: role),
                 ),
                 Positioned(
                   left: 0,
@@ -598,14 +591,9 @@ class _FeaturedRoleCard extends StatelessWidget {
 }
 
 class _CompactRoleCard extends StatelessWidget {
-  const _CompactRoleCard({
-    required this.role,
-    required this.onCollect,
-    required this.onTap,
-  });
+  const _CompactRoleCard({required this.role, required this.onTap});
 
   final RoleRecords role;
-  final void Function(RoleRecords role) onCollect;
   final Function onTap;
 
   @override
@@ -635,7 +623,7 @@ class _CompactRoleCard extends StatelessWidget {
               Positioned(
                 top: 6.h,
                 right: 5.w,
-                child: _LikePill(role: role, onCollect: onCollect),
+                child: _LikePill(role: role),
               ),
               Positioned(
                 left: 8.w,
@@ -757,10 +745,9 @@ class _RoleCollectOverlay extends StatelessWidget {
 }
 
 class _LikePill extends StatelessWidget {
-  const _LikePill({required this.role, required this.onCollect});
+  const _LikePill({required this.role});
 
   final RoleRecords role;
-  final void Function(RoleRecords role) onCollect;
 
   @override
   Widget build(BuildContext context) {
@@ -770,31 +757,28 @@ class _LikePill extends StatelessWidget {
       borderRadius: BorderRadius.circular(16.r),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: TapBox(
-          onTap: () => onCollect(role),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.40),
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isCollect ? Icons.favorite : Icons.favorite_border,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.40),
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isCollect ? Icons.favorite : Icons.favorite_border,
+                color: textColor,
+                size: 12.w,
+              ),
+              (role.likes ?? "0").tv(
+                style: TextStyle(
                   color: textColor,
-                  size: 12.w,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w400,
                 ),
-                (role.likes ?? "0").tv(
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

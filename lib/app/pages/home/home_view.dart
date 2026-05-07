@@ -249,7 +249,6 @@ class RoleContentWidgetState extends State<RoleContentWidget> {
           // }
           return RoleItem(
             role: item,
-            onCollect: (v){},
             onTap: (role) {
               logic.onItemTap(role, widget.type);
             },
@@ -276,16 +275,9 @@ Widget buildEmpty() {
 }
 
 class RoleItem extends StatelessWidget {
-  const RoleItem({
-    super.key,
-    required this.role,
-    required this.onCollect,
-    this.onTap,
-    this.index = 0,
-  });
+  const RoleItem({super.key, required this.role, this.onTap, this.index = 0});
 
   final RoleRecords role;
-  final void Function(RoleRecords role) onCollect;
   final int index;
   final Function(RoleRecords role)? onTap;
 
@@ -396,7 +388,7 @@ class RoleItem extends StatelessWidget {
                 Positioned(
                   top: 10.h,
                   left: 10.w,
-                  child: FavoredButton(onCollect: onCollect, role: role),
+                  child: FavoredButton(role: role),
                 ),
               ],
             ),
@@ -466,18 +458,29 @@ Widget buildRoleTagsWidget({String? text, Widget? textWidget}) {
 class FavoredButton extends StatelessWidget {
   const FavoredButton({
     super.key,
-    required this.onCollect,
     required this.role,
+    this.onCollect,
     this.padding,
   });
 
-  final void Function(RoleRecords role) onCollect;
   final RoleRecords role;
+  final void Function(RoleRecords role)? onCollect;
   final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
     bool isCollect = role.collect ?? false;
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        '${role.likes ?? 0}'.tv(style: tTheme.bodySmall),
+        const SizedBox(width: 3),
+        (isCollect ? Assets.imagesIcLike : Assets.imagesIcLike2).iv(
+          width: 10.w,
+        ),
+      ],
+    );
+
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -492,22 +495,15 @@ class FavoredButton extends StatelessWidget {
               width: 1.w,
             ),
           ),
-          child: TapBox(
-            padding: EdgeInsets.all(3.r),
-            onTap: () {
-              onCollect(role);
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                '${role.likes ?? 0}'.tv(style: tTheme.bodySmall),
-                const SizedBox(width: 3),
-                (isCollect ? Assets.imagesIcLike : Assets.imagesIcLike2).iv(
-                  width: 10.w,
+          child: onCollect == null
+              ? Padding(padding: EdgeInsets.all(3.r), child: content)
+              : TapBox(
+                  padding: EdgeInsets.all(3.r),
+                  onTap: () {
+                    onCollect?.call(role);
+                  },
+                  child: content,
                 ),
-              ],
-            ),
-          ),
         ),
       ),
     );
