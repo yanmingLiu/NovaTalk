@@ -103,68 +103,117 @@ class _ChatHeader extends StatelessWidget {
   }
 }
 
-class _ChatTabs extends StatelessWidget {
+class _ChatTabs extends StatefulWidget {
   const _ChatTabs({required this.onTap});
 
   final ValueChanged<int> onTap;
 
   @override
+  State<_ChatTabs> createState() => _ChatTabsState();
+}
+
+class _ChatTabsState extends State<_ChatTabs> {
+  TabController? _tabController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tabController = DefaultTabController.maybeOf(context);
+    if (_tabController == tabController) {
+      return;
+    }
+    _tabController?.removeListener(_handleTabChanged);
+    _tabController = tabController;
+    _tabController?.addListener(_handleTabChanged);
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_handleTabChanged);
+    super.dispose();
+  }
+
+  void _handleTabChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final selectedIndex = _tabController?.index ?? 0;
+
     return SizedBox(
       height: 22.h,
       child: TabBar(
-        onTap: onTap,
+        onTap: widget.onTap,
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         dividerColor: Colors.transparent,
         indicatorColor: Colors.transparent,
-        indicator: _ChatTabIndicator(),
-        indicatorSize: TabBarIndicatorSize.label,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white.withValues(alpha: 0.70),
-        labelStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w400,
-        ),
+        indicator: const BoxDecoration(),
         labelPadding: EdgeInsets.only(left: 16.w, right: 35.w),
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         splashFactory: NoSplash.splashFactory,
         tabs: [
-          Tab(height: 22.h, text: LocaleKeys.contactedBefore.tr),
-          Tab(height: 22.h, text: LocaleKeys.favorites.tr),
+          _ChatTab(
+            text: LocaleKeys.contactedBefore.tr,
+            selected: selectedIndex == 0,
+          ),
+          _ChatTab(text: LocaleKeys.favorites.tr, selected: selectedIndex == 1),
         ],
       ),
     );
   }
 }
 
-class _ChatTabIndicator extends Decoration {
-  @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
-    return _ChatTabIndicatorPainter();
-  }
-}
+class _ChatTab extends StatelessWidget {
+  const _ChatTab({required this.text, required this.selected});
 
-class _ChatTabIndicatorPainter extends BoxPainter {
+  final String text;
+  final bool selected;
+
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    final size = Size(12.w, 12.w);
-    final rect = Rect.fromLTWH(
-      offset.dx,
-      offset.dy + (configuration.size?.height ?? 22.h) - size.height - 1.h,
-      size.width,
-      size.height,
+  Widget build(BuildContext context) {
+    return Tab(
+      height: 22.h,
+      child: SizedBox(
+        height: 22.h,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.centerLeft,
+          children: [
+            if (selected)
+              Positioned(
+                left: 0,
+                bottom: -1.h,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4.r),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFFFF96F7),
+                        const Color(0xFFFF96F7).withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                  child: SizedBox(width: 12.w, height: 12.w),
+                ),
+              ),
+            Text(
+              text,
+              style: TextStyle(
+                color: selected
+                    ? Colors.white
+                    : Colors.white.withValues(alpha: 0.70),
+                fontSize: selected ? 16.sp : 14.sp,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(4.r));
-    final paint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          const Color(0xFFFF96F7),
-          const Color(0xFFFF96F7).withValues(alpha: 0),
-        ],
-      ).createShader(rect);
-    canvas.drawRRect(rrect, paint);
   }
 }
 
