@@ -135,7 +135,7 @@ class _ChatMsgVoiceWidgetState extends State<MsgAudioItem>
                     ),
                   )
                 : Lottie.asset(
-                    Assets.motionAudioVoice,
+                    Assets.animationAudioVoice,
                     controller: lottieController,
                     delegates: LottieDelegates(
                       values: [
