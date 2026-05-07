@@ -16,6 +16,7 @@ import 'package:novatalk/app/pages/chat/chat_view.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/utils/log/log_event.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
+import 'package:novatalk/app/widgets/home_top_entries.dart';
 import 'package:novatalk/app/widgets/overall_build_widget.dart';
 import 'package:novatalk/generated/locales.g.dart';
 

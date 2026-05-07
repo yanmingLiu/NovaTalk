@@ -1,7 +1,6 @@
 part of 'home_view.dart';
 
 const _homeAccent = Color(0xFFFF96F7);
-const _homePurple = Color(0xFFC7ABFF);
 const _homeCardBg = Color(0xFF40263E);
 final _horizontalLoadMoreAt = Expando<int>();
 
@@ -291,58 +290,6 @@ class _HomeRoleSection {
   final String title;
   final DiscoverListType type;
   final PageLoadRoleController controller;
-}
-
-class HomeGemPill extends StatelessWidget {
-  const HomeGemPill({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => TapBox(
-        onTap: () {
-          pushGem(ConsumeFrom.home);
-        },
-        child: Container(
-          height: 32.h,
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(18.r),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Assets.imagesIcGem.iv(width: 20.w, height: 20.w),
-              4.horizontalSpace,
-              AppUser.inst.balance.value.tv(
-                style: TextStyle(
-                  color: _homePurple,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class HomeVipEntry extends StatelessWidget {
-  const HomeVipEntry({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28.w,
-      height: 28.w,
-      alignment: Alignment.center,
-      child: Assets.imagesIcVip.iv(width: 24.w),
-    );
-  }
 }
 
 class _HomeIconButton extends StatelessWidget {

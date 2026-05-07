@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/entities/conversation_entity.dart';
 import 'package:novatalk/app/utils/app_user.dart';
+import 'package:novatalk/app/widgets/home_top_entries.dart';
 import 'package:novatalk/app/widgets/keep_alive_wrapper.dart';
 import 'package:novatalk/app/widgets/overall_build_widget.dart';
 
@@ -16,7 +17,6 @@ import '../../configs/constans.dart';
 import '../../utils/common_utils.dart';
 import '../../utils/time_util.dart';
 import '../../widgets/common_widget.dart';
-import '../home/home_view.dart';
 import 'chat_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -242,7 +242,7 @@ class _SessionListViewState extends State<SessionListView> {
       childBuilder: (context, physics) {
         return Obx(() {
           if (ctr.pageData.isEmpty) {
-            return Center(child: buildEmpty());
+            return Center(child: _buildChatEmpty());
           }
           return ListView.separated(
             physics: physics,
@@ -265,6 +265,20 @@ class _SessionListViewState extends State<SessionListView> {
       },
     );
   }
+}
+
+Widget _buildChatEmpty() {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Assets.imagesPhDataEmpty.iv(height: 180.w),
+      LocaleKeys.noData.tv(
+        style: tTheme.titleMedium?.copyWith(
+          color: Colors.black.withValues(alpha: 0.75),
+        ),
+      ),
+    ],
+  );
 }
 
 class _SessionCard extends StatelessWidget {

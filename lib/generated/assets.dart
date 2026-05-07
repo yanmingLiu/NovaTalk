@@ -2,9 +2,11 @@
 class Assets {
   Assets._();
 
-  static const String animationAudioVoice =
-      'library/animation/audio_voice.json';
+  static const String animationAudioVoice = 'library/animation/audio_voice.json';
   static const String imagesBgCommon = 'library/images/bg_common.webp';
+  static const String imagesBgLangHintCard = 'library/images/bg_lang_hint_card.svg';
+  static const String imagesBgMeVipCard = 'library/images/bg_me_vip_card.svg';
+  static const String imagesBgMeVipDiamond = 'library/images/bg_me_vip_diamond.png';
   static const String imagesBgkClotTips = 'library/images/bgk_clot_tips.webp';
   static const String imagesBgkHelpUs = 'library/images/bgk_help_us.webp';
   static const String imagesBgkSetVip = 'library/images/bgk_set_vip.webp';
@@ -14,8 +16,12 @@ class Assets {
   static const String imagesBgkVip2 = 'library/images/bgk_vip2.webp';
   static const String imagesIcFilter = 'library/images/ic_filter.webp';
   static const String imagesIcGem = 'library/images/ic_gem.webp';
+  static const String imagesIcLangCheck = 'library/images/ic_lang_check.svg';
   static const String imagesIcLike = 'library/images/ic_like.webp';
   static const String imagesIcLike2 = 'library/images/ic_like2.webp';
+  static const String imagesIcMeAvatar = 'library/images/ic_me_avatar.png';
+  static const String imagesIcMeCheck = 'library/images/ic_me_check.webp';
+  static const String imagesIcMeEdit = 'library/images/ic_me_edit.webp';
   static const String imagesIcNext = 'library/images/ic_next.webp';
   static const String imagesIcSearch = 'library/images/ic_search.webp';
   static const String imagesIcVip = 'library/images/ic_vip.webp';
@@ -29,10 +35,8 @@ class Assets {
   static const String imagesPhCheck2 = 'library/images/ph_check2.webp';
   static const String imagesPhCountAdd = 'library/images/ph_count_add.webp';
   static const String imagesPhCountAdd2 = 'library/images/ph_count_add2.webp';
-  static const String imagesPhCountReduce =
-      'library/images/ph_count_reduce.webp';
-  static const String imagesPhCountReduce2 =
-      'library/images/ph_count_reduce2.webp';
+  static const String imagesPhCountReduce = 'library/images/ph_count_reduce.webp';
+  static const String imagesPhCountReduce2 = 'library/images/ph_count_reduce2.webp';
   static const String imagesPhDataEmpty = 'library/images/ph_data_empty.webp';
   static const String imagesPhDelete = 'library/images/ph_delete.webp';
   static const String imagesPhDing = 'library/images/ph_ding.webp';
@@ -45,19 +49,16 @@ class Assets {
   static const String imagesPhGemText = 'library/images/ph_gem_text.webp';
   static const String imagesPhGoodMood = 'library/images/ph_good_mood.webp';
   static const String imagesPhHelpUs = 'library/images/ph_help_us.webp';
+  static const String imagesPhLogo = 'library/images/ph_logo.jpeg';
+  static const String imagesPhLogo2 = 'library/images/ph_logo2.webp';
   static const String imagesPhMainCreate = 'library/images/ph_main_create.webp';
-  static const String imagesPhMainCreate2 =
-      'library/images/ph_main_create2.webp';
-  static const String imagesPhMainDiscover =
-      'library/images/ph_main_discover.webp';
-  static const String imagesPhMainDiscover2 =
-      'library/images/ph_main_discover2.webp';
+  static const String imagesPhMainCreate2 = 'library/images/ph_main_create2.webp';
+  static const String imagesPhMainDiscover = 'library/images/ph_main_discover.webp';
+  static const String imagesPhMainDiscover2 = 'library/images/ph_main_discover2.webp';
   static const String imagesPhMainMe = 'library/images/ph_main_me.webp';
   static const String imagesPhMainMe2 = 'library/images/ph_main_me2.webp';
   static const String imagesPhMainMsg = 'library/images/ph_main_msg.webp';
   static const String imagesPhMainMsg2 = 'library/images/ph_main_msg2.webp';
-  static const String imagesPhLogo = 'library/images/ph_logo.jpeg';
-  static const String imagesPhLogo2 = 'library/images/ph_logo2.webp';
   static const String imagesPhMgEdit = 'library/images/ph_mg_edit.webp';
   static const String imagesPhMgImage = 'library/images/ph_mg_image.webp';
   static const String imagesPhMgLock = 'library/images/ph_mg_lock.webp';
@@ -72,10 +73,8 @@ class Assets {
   static const String imagesPhNext = 'library/images/ph_next.webp';
   static const String imagesPhPen = 'library/images/ph_pen.webp';
   static const String imagesPhPfMsg = 'library/images/ph_pf_msg.webp';
-  static const String imagesPhPhoneAnswer =
-      'library/images/ph_phone_answer.webp';
-  static const String imagesPhPhoneHangup =
-      'library/images/ph_phone_hangup.webp';
+  static const String imagesPhPhoneAnswer = 'library/images/ph_phone_answer.webp';
+  static const String imagesPhPhoneHangup = 'library/images/ph_phone_hangup.webp';
   static const String imagesPhPhoneMic = 'library/images/ph_phone_mic.webp';
   static const String imagesPhPhoneMic2 = 'library/images/ph_phone_mic2.webp';
   static const String imagesPhSearch = 'library/images/ph_search.webp';
@@ -87,8 +86,7 @@ class Assets {
   static const String imagesPhStarLike = 'library/images/ph_star_like.webp';
   static const String imagesPhStarLike2 = 'library/images/ph_star_like2.webp';
   static const String imagesPhUserAvatar = 'library/images/ph_user_avatar.webp';
-  static const String imagesPhVideoMachine =
-      'library/images/ph_video_machine.webp';
+  static const String imagesPhVideoMachine = 'library/images/ph_video_machine.webp';
   static const String imagesPhVideoPlay = 'library/images/ph_video_play.webp';
   static const String imagesPhVipBe1 = 'library/images/ph_vip_be1.webp';
   static const String imagesPhVipBe2 = 'library/images/ph_vip_be2.webp';
@@ -98,4 +96,5 @@ class Assets {
   static const String imagesPhVipClo3 = 'library/images/ph_vip_clo3.webp';
   static const String imagesPhVipClo4 = 'library/images/ph_vip_clo4.webp';
   static const String languageEnUS = 'library/language/en_US.json';
+
 }

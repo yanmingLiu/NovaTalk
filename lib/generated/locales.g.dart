@@ -217,7 +217,6 @@ class LocaleKeys {
   static const orderVFailed = 'orderVFailed';
   static const favorites = 'favorites';
   static const viewCha = 'viewCha';
-  static const viewAll = 'viewAll';
   static const callRole = 'callRole';
   static const illegalDrugs = 'illegalDrugs';
   static const unwantedMsg = 'unwantedMsg';
@@ -273,11 +272,13 @@ class LocaleKeys {
   static const topPhoto = 'topPhoto';
   static const replyMode = 'replyMode';
   static const uHits4 = 'uHits4';
+  static const viewAll = 'viewAll';
 }
 
 class Locales {
   static const en_US = {
-    'benefitsVip': '· Unlimited message\n· Unlock 10+ features',
+    'benefitsVip':
+        '@1 Unlimited chat sessions\n@2 Access to all filtering options\n@3 Advanced mode with enhanced memory\n@4 Ad-free experience',
     'upgrade': 'Upgrade',
     'upgradeToVip': 'Upgrade \nto vip',
     'searchByName': 'Search by name',
