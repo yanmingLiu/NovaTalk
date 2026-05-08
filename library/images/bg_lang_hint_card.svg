@@ -1,18 +1,11 @@
 <svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 343 75" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="&#232;&#131;&#140;&#230;&#153;&#175;&#230;&#157;&#191;">
-<mask id="mask0_0_28" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="343" height="75">
-<rect id="Rectangle 13683" width="343" height="75" rx="12" transform="matrix(-1 0 0 1 343 0)" fill="var(--fill-0, black)"/>
-</mask>
-<g mask="url(#mask0_0_28)">
-<path id="Rectangle 13682" d="M323 0.5H20C9.23048 0.5 0.500031 9.23045 0.500031 20V55C0.500031 65.7696 9.23048 74.5 20 74.5H323C333.77 74.5 342.5 65.7696 342.5 55V20C342.5 9.23045 333.77 0.5 323 0.5Z" fill="url(#paint0_linear_0_28)" stroke="url(#paint1_linear_0_28)"/>
-</g>
-</g>
+<path id="Rectangle 13682" d="M20 0.5H323C333.77 0.5 342.5 9.23045 342.5 20V55C342.5 65.7696 333.77 74.5 323 74.5H20C9.23045 74.5 0.5 65.7696 0.5 55V20C0.500001 9.23045 9.23045 0.5 20 0.5Z" fill="url(#paint0_linear_0_28)" stroke="url(#paint1_linear_0_28)"/>
 <defs>
-<linearGradient id="paint0_linear_0_28" x1="174.244" y1="71.3855" x2="174.244" y2="-3.43685e-06" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint0_linear_0_28" x1="168.756" y1="71.3855" x2="168.756" y2="-3.43685e-06" gradientUnits="userSpaceOnUse">
 <stop stop-color="#390034"/>
 <stop offset="1"/>
 </linearGradient>
-<linearGradient id="paint1_linear_0_28" x1="171.043" y1="45.6325" x2="171.043" y2="2.07596e-06" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint1_linear_0_28" x1="171.957" y1="45.6325" x2="171.957" y2="2.07596e-06" gradientUnits="userSpaceOnUse">
 <stop offset="0.703973"/>
 <stop offset="1" stop-color="#262626"/>
 </linearGradient>

@@ -1,19 +1,20 @@
 import 'package:novatalk/app/configs/app_config.dart';
-import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/utils/api_svc.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/utils/common_utils.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:get/get.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 
 import '../../../generated/assets.dart';
 import '../../../generated/locales.g.dart';
+import '../../configs/app_theme.dart';
 import '../../entities/lang.dart';
 import 'a_z_list_cursor.dart';
 import 'a_z_list_index_bar.dart';
@@ -28,6 +29,9 @@ class ChooseLangPage extends StatefulWidget {
 }
 
 class _ChooseLangPageState extends State<ChooseLangPage> {
+  static const _accent = Color(0xFFFF96F7);
+  static const _accentLight = Color(0xFFFFDFFD);
+
   List<AzListContactModel> contactList = [];
 
   List<String> get symbols => contactList.map((e) => e.section).toList();
@@ -38,7 +42,7 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
 
   ValueNotifier<AzListCursorInfoModel?> cursorInfo = ValueNotifier(null);
 
-  double indexBarWidth = 20;
+  double indexBarWidth = 24;
 
   ScrollController scrollController = ScrollController();
 
@@ -176,196 +180,195 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
 
   @override
   Widget build(BuildContext context) {
-    return buildDefaultBg(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: IconButton(
-            onPressed: () {
-              Get.back();
-            },
-            icon: buildBackIcon(color: Colors.black),
-          ),
-          title: Text(
-            LocaleKeys.languageHits.tr,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          centerTitle: true,
-        ),
-        body: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 12.w),
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: cTheme.primary,
-                borderRadius: BorderRadius.circular(16.w),
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xffFBF69A).withValues(alpha: 0.35),
-                    Color(0xffF6E961).withValues(alpha: 0.35),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Assets.imagesPhDing.iv(width: 28.w),
-                  12.horizontalSpace,
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              _buildNavBar(),
+              7.verticalSpace,
+              _buildLanguageCard(),
+              if (!loader.isSuccess)
+                const Expanded(child: SizedBox.shrink())
+              else
+                Expanded(
+                  child: Stack(
                     children: [
-                      Text.rich(
-                        TextSpan(
-                          children: buildTextSpans(
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                            origin: LocaleKeys.langAI.tr,
-                            targets: ["@s"],
-                            buildTargetTextSpan:
-                                (String target, TextStyle? style, int index) {
-                                  return TextSpan(
-                                    text:
-                                        AppUser.inst.targetLanguage.value.label,
-                                    style: style?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  );
-                                },
-                          ),
+                      SliverViewObserver(
+                        controller: observerController,
+                        sliverContexts: () {
+                          return sliverContextMap.values.toList();
+                        },
+                        child: CustomScrollView(
+                          key: ValueKey(isShowListMode),
+                          controller: scrollController,
+                          slivers: [
+                            SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+                            ...contactList.indexed.map((item) {
+                              return _buildSliver(
+                                index: item.$1,
+                                model: item.$2,
+                              );
+                            }),
+                            SliverToBoxAdapter(child: SizedBox(height: 160.h)),
+                          ],
                         ),
                       ),
-                      4.verticalSpace,
-                      LocaleKeys.saveConfirm.tv(
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black,
-                        ),
+                      _buildCursor(),
+                      Positioned(
+                        top: 16.h,
+                        bottom: 0,
+                        right: 0,
+                        child: _buildIndexBar(),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: _buildSaveButton(),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavBar() {
+    return SizedBox(
+      height: 44.h,
+      width: Get.width,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            left: 16.w,
+            top: 11.h,
+            child: TapBox(
+              onTap: () {
+                Get.back();
+              },
+              child: buildBackIcon(),
             ),
-            if (!loader.isSuccess)
-              SizedBox.shrink()
-            else
-              Expanded(
-                child: Stack(
-                  children: [
-                    SliverViewObserver(
-                      controller: observerController,
-                      sliverContexts: () {
-                        return sliverContextMap.values.toList();
-                      },
-                      child: CustomScrollView(
-                        key: ValueKey(isShowListMode),
-                        controller: scrollController,
-                        slivers: [
-                          ...contactList.mapIndexed((i, e) {
-                            return _buildSliver(index: i, model: e);
-                          }),
-                          SliverToBoxAdapter(child: Container(height: 140)),
-                        ],
+          ),
+          LocaleKeys.languageHits.tv(
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageCard() {
+    return SizedBox(
+      width: 343.w,
+      height: 75.h,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: SvgPicture.asset(
+              Assets.imagesBgLangHintCard,
+              fit: BoxFit.fill,
+            ),
+          ),
+          Positioned(
+            left: 16.w,
+            right: 16.w,
+            top: 15.h,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Obx(
+                  () => Text.rich(
+                    TextSpan(
+                      children: buildTextSpans(
+                        origin: LocaleKeys.langAI.tr,
+                        targets: const ["@s"],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        buildTargetTextSpan:
+                            (String target, TextStyle? style, int index) {
+                              return TextSpan(
+                                text:
+                                    AppUser.inst.targetLanguage.value.label ??
+                                    'English',
+                                style: style?.copyWith(
+                                  color: _accent,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            },
                       ),
                     ),
-                    _buildCursor(),
-                    Positioned(
-                      top: 0,
-                      bottom: 0,
-                      right: 0,
-                      child: _buildIndexBar(),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: _buildSaveButton(),
-                    ),
-                  ],
-                ).paddingOnly(top: 16.h),
-              ),
-          ],
-        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                8.verticalSpace,
+                LocaleKeys.saveConfirm.tv(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.70),
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        ],
       ),
     );
   }
 
   Widget _buildSaveButton() {
     final bottom = MediaQuery.of(context).padding.bottom;
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 12.w,
-      ).copyWith(top: 16, bottom: bottom > 0 ? bottom : 16),
-      color: cTheme.surface,
-      child: buildTheme3Btn(
-        alignment: Alignment.center,
-        title: LocaleKeys.save,
-        onTap: _onSaveButtonTapped,
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottom + 38.h),
+      child: Center(
+        child: TapBox(
+          onTap: _onSaveButtonTapped,
+          child: Container(
+            width: 250.w,
+            height: 44.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [_accentLight, _accent],
+              ),
+            ),
+            child: LocaleKeys.save.tv(
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
-
-  // SliverToBoxAdapter _buildHeader() {
-  //   return SliverToBoxAdapter(
-  //     child: Container(
-  //       padding: EdgeInsets.all(16),
-  //       margin: EdgeInsets.all(16),
-  //       decoration: BoxDecoration(
-  //         borderRadius: BorderRadius.circular(12),
-  //         gradient: LinearGradient(
-  //           begin: Alignment(-0.8, -0.6), // 约等于 111deg
-  //           end: Alignment(0.8, 0.6),
-  //           stops: [0.0306, 0.5406, 0.9865],
-  //           colors: [
-  //             Color(0xFFEAEDFF), // #EAEDFF
-  //             Color(0xFFF1E9FF), // #F1E9FF
-  //             Color(0xFFF7EAFF), // #F7EAFF
-  //           ],
-  //         ),
-  //       ),
-  //       child: Column(
-  //         spacing: 8,
-  //         crossAxisAlignment: CrossAxisAlignment.start, // align-items: flex-start
-  //         children: [
-  //           Obx(() {
-  //             final language = UserHelper().sessionLang.value;
-  //             final name = language?.label ?? 'English';
-  //             return RichText(
-  //               text: TextSpan(
-  //                 children: [
-  //                   TextSpan(
-  //                     text: LocaleKeys.ai_language_is.tr,
-  //                     style: ITStyle.textStyle(14, FontWeight.w500, Colors.black),
-  //                   ),
-  //                   TextSpan(
-  //                     text: ' $name',
-  //                     style: ITStyle.textStyle(14, FontWeight.w600, IColor.brand),
-  //                   ),
-  //                 ],
-  //               ),
-  //             );
-  //           }),
-  //           Text(
-  //             LocaleKeys.save.tr,
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildCursor() {
     return ValueListenableBuilder<AzListCursorInfoModel?>(
@@ -425,16 +428,8 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
           sliverContextMap[index] = context;
         }
         return Obx(
-          () => Container(
-            margin: EdgeInsets.symmetric(horizontal: 12.w),
-            decoration: BoxDecoration(
-              color: Color(0xffFAFAFA),
-              borderRadius: itemIndex == 0
-                  ? BorderRadius.vertical(top: Radius.circular(12.r))
-                  : itemIndex == names.length - 1
-                  ? BorderRadius.vertical(bottom: Radius.circular(12.r))
-                  : null,
-            ),
+          () => Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: AzListItemView(
               name: names[itemIndex],
               isChoosed: names[itemIndex] == choosedName.value,
@@ -453,15 +448,15 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
     );
     resultWidget = SliverStickyHeader(
       header: Container(
-        height: 40.h,
-        color: Colors.white,
-        alignment: Alignment.centerLeft,
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        height: 27.h,
+        color: Colors.black,
+        alignment: Alignment.topLeft,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: Text(
           model.section,
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 14,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.50),
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
           ),
         ),

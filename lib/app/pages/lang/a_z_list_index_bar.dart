@@ -1,4 +1,3 @@
-import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollview_observer/scrollview_observer.dart';
 
@@ -7,10 +6,7 @@ class AzListIndexBar extends StatefulWidget {
 
   final List<String> symbols;
 
-  final void Function(
-    int index,
-    Offset cursorOffset,
-  )? onSelectionUpdate;
+  final void Function(int index, Offset cursorOffset)? onSelectionUpdate;
 
   final void Function()? onSelectionEnd;
 
@@ -63,8 +59,10 @@ class _AzListIndexBarState extends State<AzListIndexBar> {
               widget.symbols[index],
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.black,
-                fontWeight:   FontWeight.w500,
+                color: isSelected
+                    ? Colors.black
+                    : Colors.white.withValues(alpha: 0.70),
+                fontWeight: FontWeight.w500,
               ),
             );
             resultWidget = Container(
@@ -72,7 +70,9 @@ class _AzListIndexBarState extends State<AzListIndexBar> {
               height: 18,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? cTheme.primary: Colors.transparent,
+                color: isSelected
+                    ? const Color(0xFFFF96F7)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(9),
               ),
               child: resultWidget,
@@ -115,10 +115,7 @@ class _AzListIndexBarState extends State<AzListIndexBar> {
       firstChildRenderObjOffset.dx,
       firstChildRenderObjOffset.dy + firstChildModel.size.width * 0.5,
     );
-    widget.onSelectionUpdate?.call(
-      firstChildIndex,
-      cursorOffset,
-    );
+    widget.onSelectionUpdate?.call(firstChildIndex, cursorOffset);
   }
 
   void _onGestureEnd([_]) {

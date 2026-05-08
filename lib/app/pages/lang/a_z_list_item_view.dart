@@ -1,6 +1,6 @@
-import 'package:novatalk/app/widgets/common_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../generated/assets.dart';
 
@@ -24,8 +24,7 @@ class AzListItemView extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 50,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        height: 40.h,
         decoration: BoxDecoration(
           border: isShowSeparator
               ? Border(bottom: BorderSide(color: Colors.grey[300]!, width: 0.5))
@@ -37,14 +36,29 @@ class AzListItemView extends StatelessWidget {
             Expanded(
               child: Text(
                 name,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            if (isChoosed) Assets.imagesPhCheck2.iv(width: 20.w)
+            if (isChoosed)
+              SizedBox(
+                width: 36.w,
+                height: 40.h,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 12.w),
+                    child: SvgPicture.asset(
+                      Assets.imagesIcLangCheck,
+                      width: 20.w,
+                      height: 20.w,
+                    ),
+                  ),
+                ),
+              ),
             // else
             //   Assets.imagesIgCheck2Un.iv(width: 20.w),
           ],

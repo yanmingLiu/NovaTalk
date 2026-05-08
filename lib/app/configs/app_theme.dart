@@ -601,7 +601,28 @@ Widget buildHomeTitleTabBar({
 }
 
 Widget buildBackIcon({Color? color}) {
-  return Assets.imagesPhBack.iv(width: 24.w, color: color);
+  return Center(
+    child: Container(
+      width: 24.w,
+      height: 24.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFF131711).withValues(alpha: 0.30),
+        borderRadius: BorderRadius.circular(13.r),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.70),
+          width: 0.6,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.20),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Icon(Icons.arrow_back_ios_rounded,color: color,size: 16.w,),
+    ),
+  );
 }
 
 Widget buildCloseIcon() {

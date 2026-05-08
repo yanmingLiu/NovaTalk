@@ -864,11 +864,7 @@ class HomeDiscoverCategoryPage extends StatelessWidget {
           systemOverlayStyle: SystemUiOverlayStyle.light,
           leading: TapBox(
             onTap: Get.back,
-            child: Icon(
-              Icons.chevron_left_rounded,
-              color: Colors.white,
-              size: 30.w,
-            ),
+            child: buildBackIcon(color: Colors.white),
           ),
           title: title.tv(
             style: TextStyle(
