@@ -420,8 +420,9 @@ class _HomeCategorySection extends StatelessWidget {
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
                     final role = roles[index];
-                    return _CompactRoleCard(
+                    return HomeRoleGridCard(
                       role: role,
+                      width: 126.w,
                       onTap: () => onItemTap(role),
                     );
                   },
@@ -537,11 +538,23 @@ class _FeaturedRoleCard extends StatelessWidget {
   }
 }
 
-class _CompactRoleCard extends StatelessWidget {
-  const _CompactRoleCard({required this.role, required this.onTap});
+class HomeRoleGridCard extends StatelessWidget {
+  const HomeRoleGridCard({
+    super.key,
+    required this.role,
+    required this.onTap,
+    this.onCollect,
+    this.width,
+    this.likeTop,
+    this.likeRight,
+  });
 
   final RoleRecords role;
   final Function onTap;
+  final void Function(RoleRecords role)? onCollect;
+  final double? width;
+  final double? likeTop;
+  final double? likeRight;
 
   @override
   Widget build(BuildContext context) {
@@ -549,55 +562,57 @@ class _CompactRoleCard extends StatelessWidget {
     final showBorder = isCollect || role.vip == true;
     return TapBox(
       onTap: onTap,
-      child: Container(
-        width: 126.w,
-        decoration: BoxDecoration(
-          color: _homeCardBg,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: showBorder ? _homeAccent : Colors.transparent,
-            width: 1.w,
+      child: SizedBox(
+        width: width,
+        child: Container(
+          decoration: BoxDecoration(
+            color: _homeCardBg,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: showBorder ? _homeAccent : Colors.transparent,
+              width: 1.w,
+            ),
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.r),
-          child: Stack(
-            children: [
-              Positioned.fill(child: role.avatar.iv(fit: BoxFit.cover)),
-              Positioned.fill(child: _RoleImageShade(radius: 8.r)),
-              if (isCollect)
-                Positioned.fill(child: _RoleCollectOverlay(radius: 8.r)),
-              Positioned(
-                top: 6.h,
-                right: 5.w,
-                child: _LikePill(role: role),
-              ),
-              Positioned(
-                left: 8.w,
-                right: 8.w,
-                bottom: 8.h,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _RoleNameAge(role: role),
-                    4.verticalSpace,
-                    _RoleTags(role: role, maxCount: 2),
-                    4.verticalSpace,
-                    (role.intro ?? role.aboutMe).tv(
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        height: 1.12,
-                      ),
-                    ),
-                  ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Stack(
+              children: [
+                Positioned.fill(child: role.avatar.iv(fit: BoxFit.cover)),
+                Positioned.fill(child: _RoleImageShade(radius: 8.r)),
+                if (isCollect)
+                  Positioned.fill(child: _RoleCollectOverlay(radius: 8.r)),
+                Positioned(
+                  top: likeTop ?? 6.h,
+                  right: likeRight ?? 5.w,
+                  child: _LikePill(role: role, onCollect: onCollect),
                 ),
-              ),
-            ],
+                Positioned(
+                  left: 8.w,
+                  right: 8.w,
+                  bottom: 8.h,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _RoleNameAge(role: role),
+                      4.verticalSpace,
+                      _RoleTags(role: role, maxCount: 2),
+                      4.verticalSpace,
+                      (role.intro ?? role.aboutMe).tv(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w400,
+                          height: 1.12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -692,15 +707,16 @@ class _RoleCollectOverlay extends StatelessWidget {
 }
 
 class _LikePill extends StatelessWidget {
-  const _LikePill({required this.role});
+  const _LikePill({required this.role, this.onCollect});
 
   final RoleRecords role;
+  final void Function(RoleRecords role)? onCollect;
 
   @override
   Widget build(BuildContext context) {
     final isCollect = role.collect ?? false;
     final textColor = isCollect ? _homeAccent : Colors.white;
-    return ClipRRect(
+    final content = ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
@@ -730,6 +746,12 @@ class _LikePill extends StatelessWidget {
         ),
       ),
     );
+
+    if (onCollect == null) {
+      return content;
+    }
+
+    return TapBox(onTap: () => onCollect?.call(role), child: content);
   }
 }
 

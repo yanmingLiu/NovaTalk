@@ -1,4 +1,3 @@
-import 'package:novatalk/generated/locales.g.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -7,10 +6,8 @@ import 'package:get/get.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/widgets/overall_build_widget.dart';
 import 'package:novatalk/app/widgets/release_text_edit_focus.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../../generated/assets.dart';
-import '../../../widgets/gradient_bound_painter.dart';
 import '../home_controller.dart';
 import '../home_view.dart';
 import 'search_controller.dart';
@@ -23,53 +20,34 @@ class SearchView extends GetBuildView<SearchController> {
   Widget builder(BuildContext context) {
     return ReleaseTextEditFocus(
       child: Scaffold(
-        body: buildDefaultBg(
-          child: Stack(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Column(
             children: [
-              SafeArea(
-                child: Column(
+              Padding(
+                padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 1.h),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        12.horizontalSpace,
-                        // TapBox(
-                        //   onTap: () => Get.back(),
-                        //   padding: EdgeInsets.all(5.r),
-                        //   child: buildBackIcon(),
-                        // ).marginOnly(left: 13.w),
-                        // 5.horizontalSpace,
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(0x0A000000),
-                                  offset: Offset(0, 0),
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: buildTopSearchTextField(
-                              isSearch: true,
-                              controller: controller.searchController,
-                              onSubmitted: controller.onSubmitted,
-                            ),
-                          ).marginOnly(right: 12.w),
-                        ),
-                      ],
+                    TapBox(
+                      onTap: Get.back,
+                      child: buildBackIcon(color: Colors.white),
                     ),
-                    16.verticalSpace,
+                    16.horizontalSpace,
                     Expanded(
-                      child: Container(
-                        alignment: Alignment.topCenter,
-                        child: SearchRoleContentWidget(
-                          type: DiscoverListType.all,
-                          firstLoad: false,
-                          controller: controller.roleContentController,
-                        ),
+                      child: _SearchInput(
+                        controller: controller.searchController,
+                        onSubmitted: controller.onSubmitted,
                       ),
                     ),
                   ],
+                ),
+              ),
+              16.verticalSpace,
+              Expanded(
+                child: SearchRoleContentWidget(
+                  type: DiscoverListType.all,
+                  firstLoad: false,
+                  controller: controller.roleContentController,
                 ),
               ),
             ],
@@ -116,159 +94,87 @@ class _SearchRoleContentWidgetState extends RoleContentWidgetState {
 
   @override
   Widget buildContent() {
-    return ListView.separated(
-      separatorBuilder: (BuildContext context, int index) {
-        return 12.verticalSpace;
-      },
-      padding: EdgeInsets.symmetric(horizontal: 15.w),
+    return GridView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: controller.pageData.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisExtent: 224.h,
+        crossAxisSpacing: 7.w,
+        mainAxisSpacing: 7.h,
+      ),
       itemBuilder: (BuildContext context, int index) {
         final item = controller.pageData[index];
-        return TapBox(
+        return HomeRoleGridCard(
+          role: item,
           onTap: () {
             logic.onItemTap(item, widget.type);
           },
-          child: smallRoleItem(index),
+          onCollect: controller.onCollect,
+          likeTop: 8.h,
+          likeRight: 6.w,
         );
       },
     );
   }
+}
 
-  Widget smallRoleItem(int index) {
-    final item = controller.pageData[index];
-    final vip = item.vip == true;
-    final strokeWidth = vip ? 1.0 : 0.0;
-    final radius = 16.r;
+class _SearchInput extends StatelessWidget {
+  const _SearchInput({required this.controller, required this.onSubmitted});
 
-    return Padding(
-      padding: EdgeInsets.all(strokeWidth),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: vip
-              ? Theme1.primary.withValues(alpha: 0.2)
-              : Color(0x1AFFFFFF),
-          borderRadius: BorderRadius.circular(radius),
+  final TextEditingController controller;
+  final void Function(String value) onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(22.r),
+      borderSide: BorderSide.none,
+    );
+    return SizedBox(
+      height: 44.h,
+      child: TextField(
+        controller: controller,
+        textInputAction: TextInputAction.search,
+        onSubmitted: onSubmitted,
+        cursorColor: Colors.white,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w500,
         ),
-        child: Stack(
-          children: [
-            Container(
-              margin: EdgeInsets.only(top: 35.h),
-              padding: EdgeInsets.only(
-                left: 122.w,
-                right: 12.h,
-                top: 12.h,
-                bottom: 12.h,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(24.r)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    offset: Offset(0, 0),
-                    blurRadius: 20,
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: Get.width / 3),
-                        child: item.name.tv(
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      if (!item.age.isVoid)
-                        Container(
-                          margin: EdgeInsets.only(left: 5.w),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: item.age.tv(
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: cTheme.primary,
-                            ),
-                          ),
-                        ),
-                      ex,
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 4.h,
-                          horizontal: 9.w,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cTheme.scrim,
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                        child: LocaleKeys.chat.tv(
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (item.tags != null || item.tags?.isNotEmpty == true)
-                    buildTags(item),
-                  3.verticalSpace,
-                  (item.intro ?? item.aboutMe)
-                      .tv(
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.black,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      )
-                      .marginOnly(right: 15.w),
-                ],
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF331E31),
+          hintText: 'Search',
+          hintStyle: TextStyle(
+            color: Colors.white.withValues(alpha: 0.30),
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          contentPadding: EdgeInsets.zero,
+          enabledBorder: border,
+          focusedBorder: border,
+          disabledBorder: border,
+          border: border,
+          prefixIconConstraints: BoxConstraints(
+            minWidth: 38.w,
+            minHeight: 44.h,
+          ),
+          prefixIcon: SizedBox.square(
+            dimension: 30.w,
+            child: Padding(
+              padding: EdgeInsets.only(left: 14.w, right: 4.w),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Opacity(
+                  opacity: 0.70,
+                  child: Assets.imagesIcSearch.iv(width: 23.w),
+                ),
               ),
             ),
-            Container(
-              width: 100.w,
-              height: 100.w,
-              margin: EdgeInsets.only(left: 8.w),
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: ClipOval(child: item.avatar.iv(fit: BoxFit.cover)),
-                  ),
-                  Positioned(
-                    bottom: -8.h,
-                    child: FavoredButton(
-                      onCollect: (role) {
-                        controller.onCollect(role);
-                      },
-                      role: item,
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -7,9 +7,11 @@ import 'package:novatalk/app/widgets/common_widget.dart';
 import '../../../generated/assets.dart';
 import '../../../generated/locales.g.dart';
 import '../../entities/role_tags_entity.dart';
-import '../../widgets/gradient_bound_painter.dart';
 import 'home_controller.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+
+const _filterAccent = Color(0xFFFF96F7);
+const _filterAccentLight = Color(0xFFFFDFFD);
+const _filterPanel = Color(0xFF331E31);
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
@@ -21,101 +23,121 @@ class FilterView extends StatefulWidget {
 class _FilterViewState extends State<FilterView> {
   final ctr = Get.find<RolesController>();
 
-  late RoleTagsEntity selectedType = ctr.roleTags.first;
-  late final selectTags = ctr.selectTags.value.obs;
+  late final List<RoleTagsEntity> types = ctr.roleTags.length > 2
+      ? ctr.roleTags.take(2).toList()
+      : ctr.roleTags;
+  late RoleTagsEntity selectedType = types.first;
+  late final Set<RoleTagsTagList> selectTags = Set<RoleTagsTagList>.from(
+    ctr.selectTags,
+  );
 
   @override
   Widget build(BuildContext context) {
     final tags = selectedType.tags;
+    final containsAll =
+        tags != null && tags.isNotEmpty && selectTags.containsAll(tags);
 
-    bool containsAll = false;
-    if (tags != null && tags.isNotEmpty) {
-      containsAll = selectTags.containsAll(tags);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            TapBox(
-              onTap: () {
-                Get.back();
-              },
-              child: buildBackIcon(color: Color(0xff1C1A1D)),
-            ),
-            16.horizontalSpace,
-            LocaleKeys.pickTags.tv(
-              style: tTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: Color(0xff434343),
-                fontSize: 16.sp,
-              ),
-            ),
-          ],
-        ),
-        18.verticalSpace,
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: 40.h,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Positioned(left: -12.w, height: 35.h, child: _buildType()),
-                  ],
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                if (containsAll) {
-                  selectTags.removeAll(tags ?? []);
-                } else {
-                  selectTags.addAll(tags ?? []);
-                }
-                setState(() {});
-              },
-              child: Text(
-                containsAll
-                    ? LocaleKeys.deselectAllItems.tr
-                    : LocaleKeys.selectAllItems.tr,
-                style: tTheme.titleMedium!.copyWith(
-                  color: Colors.black,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ).marginOnly(top: 16, bottom: 12),
-            ),
-          ],
-        ),
-        12.verticalSpace,
-        Expanded(
-          child: Column(
+    return Container(
+      height: Get.height,
+      color: Colors.black,
+      child: Stack(
+        children: [
+          const _FilterTopGlow(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildTags()),
-              28.verticalSpace,
-              buildTheme3Btn(
-                alignment: Alignment.center,
-                onTap: () {
-                  Get.dismissBottomSheet();
-                  ctr.filterEvent.value = Set<RoleTagsTagList>.from(
-                    selectTags,
-                  );
-                  ctr.filterEvent.refresh();
-                  ctr.selectTags.value = selectTags.value;
-                },
-                title: LocaleKeys.confirmSel.tr,
+             kToolbarHeight.verticalSpace,
+              _buildHeader(containsAll, tags),
+              26.verticalSpace,
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _FilterTitle(),
+                      20.verticalSpace,
+                      _buildTypeTabs(),
+                      16.verticalSpace,
+                      Expanded(child: _buildTags()),
+                      16.verticalSpace,
+                      _buildConfirmButton(),
+                      40.verticalSpace,
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 30),
             ],
           ),
-        ),
-      ],
-    ).marginSymmetric(horizontal: 16.w, vertical: 20.h);
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool containsAll, List<RoleTagsTagList>? tags) {
+    return Padding(
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 11.h),
+      child: Row(
+        children: [
+          TapBox(
+            onTap: Get.back,
+            child: buildCloseIcon(color: Colors.white),
+          ),
+          const Spacer(),
+          TapBox(
+            onTap: () {
+              if (containsAll) {
+                selectTags.removeAll(tags ?? []);
+              } else {
+                selectTags.addAll(tags ?? []);
+              }
+              setState(() {});
+            },
+            child: Container(
+              width: 102.w,
+              height: 28.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _filterPanel,
+                borderRadius: BorderRadius.circular(18.r),
+              ),
+              child:
+                  (containsAll
+                          ? LocaleKeys.cancel.tr
+                          : LocaleKeys.selectAllItems.tr)
+                      .tv(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: _filterAccent,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeTabs() {
+    return Row(
+      children: List.generate(types.length, (index) {
+        final type = types[index];
+        final isSelected = identical(type, selectedType);
+        return Padding(
+          padding: EdgeInsets.only(right: index == types.length - 1 ? 0 : 40.w),
+          child: TapBox(
+            onTap: () {
+              selectedType = type;
+              setState(() {});
+            },
+            child: _FilterTypeItem(type: type, selected: isSelected),
+          ),
+        );
+      }),
+    );
   }
 
   Widget _buildTags() {
@@ -125,101 +147,212 @@ class _FilterViewState extends State<FilterView> {
     }
 
     return GridView.builder(
+      padding: EdgeInsets.zero,
       itemCount: tags.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        childAspectRatio: 2.8,
-        mainAxisSpacing: 12.w,
-        crossAxisSpacing: 12.h,
+        mainAxisExtent: 40.h,
+        mainAxisSpacing: 8.h,
+        crossAxisSpacing: 8.w,
       ),
       itemBuilder: (context, index) {
-        final e = tags[index];
-        var isSelected = selectTags.contains(e);
-        return InkWell(
+        final tag = tags[index];
+        final isSelected = selectTags.contains(tag);
+        return TapBox(
           onTap: () {
-            if (selectTags.contains(e)) {
-              selectTags.remove(e);
+            if (isSelected) {
+              selectTags.remove(tag);
             } else {
-              selectTags.add(e);
+              selectTags.add(tag);
             }
             setState(() {});
           },
-          child: _buildItem(isSelected, e),
+          child: _FilterTagItem(tag: tag, selected: isSelected),
         );
       },
     );
   }
 
-  Widget _buildItem(bool isSelected, RoleTagsTagList e) {
-    return Stack(
-      children: [
-        Container(
+  Widget _buildConfirmButton() {
+    return Center(
+      child: TapBox(
+        onTap: () {
+          Get.dismissBottomSheet();
+          ctr.filterEvent.value = Set<RoleTagsTagList>.from(selectTags);
+          ctr.filterEvent.refresh();
+          ctr.selectTags.assignAll(selectTags);
+        },
+        child: Container(
+          width: 250.w,
+          height: 44.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(19.r)),
-            border: Border.all(
-              color: isSelected ? cTheme.scrim : Color(0xffEFEFEF),
-              width: 1.w,
+            borderRadius: BorderRadius.circular(24.r),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [_filterAccentLight, _filterAccent],
             ),
           ),
-          child: Text(
-            e.name ?? "",
-            textAlign: TextAlign.center,
-            maxLines:  1,
-            overflow: TextOverflow.ellipsis,
-            style: tTheme.titleSmall!.copyWith(
-              color: isSelected ? Colors.black : Color(0xff595959),
+          child: LocaleKeys.confirmSel.tr.tv(
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
-              fontSize: 15.sp,
             ),
           ),
         ),
-        if (isSelected)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Assets.imagesPhCheck.iv(
-              width: 16.w,
-            )
-          )
-      ],
-    );
-  }
-
-  Widget _buildType() {
-    var tags = ctr.roleTags;
-    List<RoleTagsEntity> result = (tags.length > 2)
-        ? tags.take(2).toList()
-        : tags;
-
-    RoleTagsEntity type1 = result[0];
-
-    RoleTagsEntity? type2;
-    if (result.length > 1) {
-      type2 = result[1];
-    }
-
-    return DefaultTabController(
-      length: result.length,
-      child: buildHomeTitleTabBar(
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
-        labelPadding: EdgeInsets.only(right: 22.w),
-        onTap: (index) {
-          selectedType = result[index];
-          setState(() {});
-        },
-        tabs: [
-          Tab(child: _buildTypeItem(type1)),
-          if (type2 != null) Tab(child: _buildTypeItem(type2)),
-        ],
       ),
     );
   }
+}
 
-  Widget _buildTypeItem(RoleTagsEntity type) {
+class _FilterTopGlow extends StatelessWidget {
+  const _FilterTopGlow();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: SizedBox(
+        height: 300.h,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Opacity(
+              opacity: 0.40,
+              child: Assets.imagesBgCommon.iv(
+                width: Get.width,
+                height: 210.h,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 120.h,
+              bottom: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withValues(alpha: 0), Colors.black],
+                    stops: const [0.05, 0.60],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterTitle extends StatelessWidget {
+  const _FilterTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: 2.w,
+          bottom: 2.h,
+          child: Container(
+            width: 218.w,
+            height: 12.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.r),
+              gradient: LinearGradient(
+                colors: [_filterAccent, _filterAccent.withValues(alpha: 0)],
+              ),
+            ),
+          ),
+        ),
+        LocaleKeys.pickTags.tr.tv(
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w700,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterTypeItem extends StatelessWidget {
+  const _FilterTypeItem({required this.type, required this.selected});
+
+  final RoleTagsEntity type;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = type.labelType ?? '';
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (selected)
+          Positioned(
+            left: 0,
+            bottom: 1.h,
+            child: Container(
+              width: 12.w,
+              height: 12.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.r),
+                gradient: LinearGradient(
+                  colors: [_filterAccent, _filterAccent.withValues(alpha: 0)],
+                ),
+              ),
+            ),
+          ),
+        title.tv(
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: selected ? 1 : 0.85),
+            fontSize: selected ? 16.sp : 14.sp,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterTagItem extends StatelessWidget {
+  const _FilterTagItem({required this.tag, required this.selected});
+
+  final RoleTagsTagList tag;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(),
-      child: Center(child: Text(type.labelType ?? '')),
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(horizontal: 8.w),
+      decoration: BoxDecoration(
+        color: selected
+            ? _filterAccent.withValues(alpha: 0.20)
+            : Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: (tag.name ?? '').tv(
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: selected
+              ? _filterAccent
+              : Colors.white.withValues(alpha: 0.85),
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

@@ -167,10 +167,9 @@ class RolesController extends GetxController {
       return;
     }
     Get.bottomSheet(
-      buildTheme2SheetRootWidget(
-        child: SizedBox(height: Get.height / 1.8, child: FilterView()),
-      ),
+      const FilterView(),
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 
