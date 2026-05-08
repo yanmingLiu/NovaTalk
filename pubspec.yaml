@@ -76,6 +76,7 @@ dependencies:
   pointycastle: 3.9.1
   photo_view: 0.15.0
   image_picker: 1.2.1
+  video_player: 2.11.1
   path_provider: ^2.1.5
   flutter_svg: ^2.2.0
   queue: 3.4.0
@@ -149,6 +150,5 @@ flutter:
     - library/images/
     - library/language/
     - library/animation/
-
 
 

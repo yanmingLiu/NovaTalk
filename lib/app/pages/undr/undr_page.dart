@@ -13,12 +13,13 @@ import 'package:get/get.dart';
 import '../../../generated/locales.g.dart';
 import '../../routes/app_pages.dart';
 import '../../widgets/common_widget.dart';
+import 'ai_photo/ai_photo_design.dart';
 import 'ctls/undress_page_controller.dart';
 
 TextStyle undrDescribeTextStyle() => TextStyle(
   fontSize: 12.sp,
-  color: Color(0xff181818).withValues(alpha: 0.5),
-  fontWeight: FontWeight.w500,
+  color: Colors.white,
+  fontWeight: FontWeight.w400,
 );
 
 TextStyle undrTitleTextStyle() => TextStyle(
@@ -38,235 +39,173 @@ class UndressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final body = Column(
-      children: [
-        controller.args.isHomeReuse
-            ? sh
-            : AppBar(
-                leading: Center(
-                  child: SizedBox(
-                    width: 42.w,
-                    child: IconButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      icon: buildBackIcon(color: Colors.black),
-                    ),
-                  ),
-                ),
-                centerTitle: true,
-                systemOverlayStyle: SystemUiOverlayStyle.light,
-                title: Text(
-                  LocaleKeys.dress.tr,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-        Expanded(
-          child: Obx(
-            () => Stack(
+    final body = AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Column(
+        children: [
+          if (!controller.args.isHomeReuse)
+            SafeArea(
+              bottom: false,
+              child: AiPhotoStandaloneHeader(title: LocaleKeys.dress.tr),
+            ),
+          Expanded(child: _buildContent(context)),
+        ],
+      ),
+    );
+    return ReleaseTextEditFocus(
+      child: controller.args.isHomeReuse
+          ? body
+          : buildDefaultBg(bgColor: Colors.black, child: body),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Obx(() {
+      final showStyle = controller.showStyle.value;
+      final showBodyTitle = !showStyle && !controller.undressAnother.value;
+      return Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: showStyle ? _selectedPhotoScrollPadding(context) : 0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                if (showBodyTitle) ...[
+                  if (controller.args.isHomeReuse)
+                    2.verticalSpace
+                  else
+                    18.verticalSpace,
+                  buildAiPhotoBodyTitle(LocaleKeys.dress.tr),
+                  15.verticalSpace,
+                ],
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (controller.undressAnother.value) 100.verticalSpace,
-                        // if (!controller.showStyle.value &&
-                        //     !controller.undressAnother.value)
-                        //   Center(
-                        //     child: Text(
-                        //       LocaleKeys.dre.tr,
-                        //       textAlign: TextAlign.center,
-                        //       style: undrTitleTextStyle(),
-                        //     ),
-                        //   ),
-                        14.verticalSpace,
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
-                          child: AspectRatio(
-                            aspectRatio: 0.77,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20.r),
-                              child: SizedBox(
-                                width: Get.width,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    Positioned.fill(child: buildImage()),
-                                    Positioned(
-                                      right: 10.w,
-                                      top: 10.h,
-                                      child: Obx(
-                                        () =>
-                                            controller.showStyle.value ||
-                                                controller.undressAnother.value
-                                            ? TapBox(
-                                                onTap: () {
-                                                  controller.resetState();
-                                                },
-                                                child: buildCloseIcon(),
-                                              )
-                                            : const SizedBox.shrink(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ).marginSymmetric(horizontal: 18.w),
-                        ),
-                        5.verticalSpaceFromWidth,
-                        if (controller.showStyle.value) undressTemplate(),
-                        if (!controller.showStyle.value &&
-                            !controller.undressAnother.value)
-                          Container(
-                            width: double.infinity,
-                            margin: EdgeInsets.only(top: 18.h),
-                            decoration: BoxDecoration(
-                              color: Color(0xffFAFAFA),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(21.r),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 26.w),
-                              child: DefaultTextStyle(
-                                style: undrDescribeTextStyle(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    12.verticalSpace,
-                                    Text(LocaleKeys.aHits1.tr),
-                                    6.verticalSpaceFromWidth,
-                                    Text(LocaleKeys.abHits2.tr),
-                                    6.verticalSpaceFromWidth,
-                                    Text(LocaleKeys.uHits3.tr),
-                                    6.verticalSpaceFromWidth,
-                                    Text(LocaleKeys.uHits4.tr),
-                                    14.verticalSpaceFromWidth,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        150.verticalSpace,
-                      ],
-                    ),
+                  padding: EdgeInsets.symmetric(horizontal: 52.w),
+                  child: _buildImageCard(),
+                ),
+                showStyle ? 8.verticalSpace : 12.verticalSpace,
+                if (showStyle)
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w),
+                    child: undressTemplate(),
+                  )
+                else if (!controller.undressAnother.value)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 52.w),
+                    child: buildAiPhotoHintList([
+                      LocaleKeys.aHits1,
+                      LocaleKeys.abHits2,
+                      LocaleKeys.uHits3,
+                      LocaleKeys.uHits4,
+                    ]),
                   ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: controller.showStyle.value
-                      ? Container(
-                          color: cTheme.surface,
-                          padding: EdgeInsets.only(top: 16.h, bottom: 30.h),
-                          child: buildUndrBtn(
-                            vertical: 2.h,
-                            titleWidget: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                LocaleKeys.generate.tv(
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                Obx(
-                                  () => Text.rich(
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff1C1A1D),
-                                    ),
-                                    TextSpan(
-                                      text: '${LocaleKeys.credits.tr}: ',
-                                      children: [
-                                        TextSpan(
-                                          text: '${AppUser.inst.createImg}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              ' ${LocaleKeys.photos.tr.toLowerCase()}',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            title: LocaleKeys.generate.tr,
-                            onTap: () {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              controller.undressCharacter();
-                            },
-                          ).marginSymmetric(horizontal: 12.w),
-                        )
-                      : Obx(() {
-                          Widget widget;
-                          if (controller.undressAnother.value) {
-                            widget = buildUndrBtn(
-                              onTap: controller.selectImage,
-                              title: LocaleKeys.create.tr,
-                            );
-                          } else {
-                            widget = Row(
-                              spacing: 11.w,
-                              children: [
-                                Expanded(
-                                  child: buildUndrBtn(
-                                    tb1: !controller.args.isHomeReuse,
-                                    bold:  controller.args.isHomeReuse,
-                                    onTap: () => controller.selectImage(),
-                                    title: LocaleKeys.uploadImage.tr,
-                                  ),
-                                ),
-                                if (!controller.args.isHomeReuse)
-                                  Expanded(
-                                    child: Obx(
-                                      () => buildUndrBtn(
-                                        title: controller.finishGenerate.value
-                                            ? LocaleKeys.viewCha.tr
-                                            : LocaleKeys.uRole.tr,
-                                        onTap: () =>
-                                            controller.undressCharacter(),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            );
-                          }
-                          return Container(
-                            color: cTheme.surface,
-                            child: widget.paddingOnly(
-                              left: 12.w,
-                              right: 12.w,
-                              bottom: !controller.args.isHomeReuse
-                                  ? ScreenUtil().bottomBarHeight + 30.h
-                                  : 10.h,
-                            ),
-                          );
-                        }),
-                ),
-                if (controller.undressing.value) buildProcessView(),
+                showStyle ? 80.verticalSpace : 150.verticalSpace,
               ],
             ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: showStyle
+                ? AiPhotoBottomActionPanel(
+                    homeReuse: controller.args.isHomeReuse,
+                    child: _buildBottomAction(),
+                  )
+                : Padding(
+                    padding: EdgeInsets.only(
+                      bottom: aiPhotoBottomButtonOffset(
+                        context: context,
+                        homeReuse: controller.args.isHomeReuse,
+                      ),
+                    ),
+                    child: Center(child: _buildBottomAction()),
+                  ),
+          ),
+          if (controller.undressing.value) buildProcessView(),
+        ],
+      );
+    });
+  }
+
+  double _selectedPhotoScrollPadding(BuildContext context) {
+    return MediaQuery.of(context).padding.bottom + 140.h;
+  }
+
+  Widget _buildImageCard() {
+    return Container(
+      width: double.infinity,
+      height: 350.h,
+      decoration: BoxDecoration(
+        color: aiPhotoPanel,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.r),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(child: buildImage()),
+            if (controller.showStyle.value || controller.undressAnother.value)
+              Positioned(
+                right: 10.w,
+                top: 10.h,
+                child: TapBox(
+                  onTap: controller.resetState,
+                  child: buildCloseIcon(),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomAction() {
+    if (controller.showStyle.value) {
+      return buildAiPhotoGenerateAction(
+        balance: AppUser.inst.createImg.value,
+        unit: LocaleKeys.photos.tr,
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          controller.undressCharacter();
+        },
+      );
+    }
+    if (controller.undressAnother.value) {
+      return buildAiPhotoActionButton(
+        title: LocaleKeys.create.tr,
+        onTap: controller.selectImage,
+      );
+    }
+    if (controller.args.isHomeReuse) {
+      return buildAiPhotoActionButton(
+        title: LocaleKeys.uploadImage.tr,
+        onTap: controller.selectImage,
+      );
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        buildAiPhotoActionButton(
+          title: LocaleKeys.uploadImage.tr,
+          outlined: true,
+          width: 150.w,
+          onTap: controller.selectImage,
+        ),
+        12.horizontalSpace,
+        Obx(
+          () => buildAiPhotoActionButton(
+            title: controller.finishGenerate.value
+                ? LocaleKeys.viewCha.tr
+                : LocaleKeys.uRole.tr,
+            width: 150.w,
+            onTap: controller.undressCharacter,
           ),
         ),
       ],
     );
-    return ReleaseTextEditFocus(child: controller.args.isHomeReuse ? body : buildDefaultBg(child: body));
   }
 
   Widget buildImage() {
@@ -310,14 +249,14 @@ class UndressPage extends StatelessWidget {
         4.verticalSpace,
         Obx(
           () => SizedBox(
-            height: 96.h,
+            height: 76.h,
             child: ListView.separated(
               itemCount: controller.templateConfigList.length,
               shrinkWrap: true,
 
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(bottom: 0),
-              separatorBuilder: (context, index) => 8.horizontalSpace,
+              separatorBuilder: (context, index) => 0.horizontalSpace,
               itemBuilder: (context, index) {
                 return Obx(() {
                   UndStyleBean data = controller.templateConfigList[index];
@@ -328,24 +267,31 @@ class UndressPage extends StatelessWidget {
                       controller.selectUndressMode(index);
                     },
                     child: Container(
-                      width: 90.w,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(12.r)),
-                        border: Border.all(
-                          color: isSelected ? cTheme.scrim : Color(0xffFAFAFA),
-                          width: 1.r,
-                        ),
-                      ),
+                      width: 64.w,
+                      height: 76.h,
+                      alignment: Alignment.topCenter,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
-                            padding: EdgeInsets.all(8.r),
+                            width: 42.w,
+                            height: 42.w,
+                            padding: EdgeInsets.all(9.r),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? aiPhotoAccent.withValues(alpha: 0.10)
+                                  : Colors.white.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: isSelected
+                                  ? Border.all(color: aiPhotoAccent, width: 1.r)
+                                  : null,
+                            ),
                             child: CachedNetworkImage(
-                              width: 22.w,
+                              width: 24.w,
+                              height: 24.w,
                               imageUrl: data.icon ?? '',
-                              color: Colors.black,
+                              color: isSelected ? aiPhotoAccent : Colors.white,
                               errorWidget: (context, url, error) {
                                 return buildLoadingWidget();
                               },
@@ -354,17 +300,19 @@ class UndressPage extends StatelessWidget {
                               },
                             ),
                           ),
-                          5.verticalSpace,
+                          4.verticalSpace,
                           ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 50.w),
+                            constraints: BoxConstraints(maxWidth: 58.w),
                             child: Text(
                               data.name ?? '',
                               maxLines: 2,
                               textAlign: TextAlign.center,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Color(0xff434343),
+                                fontSize: 10.sp,
+                                color: isSelected
+                                    ? aiPhotoAccent
+                                    : Colors.white.withValues(alpha: 0.70),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -378,13 +326,13 @@ class UndressPage extends StatelessWidget {
             ),
           ),
         ),
-        24.verticalSpace,
+        8.verticalSpace,
         Text(
           "${LocaleKeys.cusPrompt.tr}:",
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
         5.verticalSpace,
@@ -393,38 +341,41 @@ class UndressPage extends StatelessWidget {
             final border = OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide(
-                color: Colors.black.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: 0.20),
               ),
             );
             return InkWell(
               onTap: () {
                 showCustomPromptDialog(context);
               },
-              child: TextField(
-                enabled: false,
-                cursorColor: Theme1.cursorColor,
-                controller: controller.customPromptController,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 13.h,
-                    horizontal: 16.w,
+              child: SizedBox(
+                height: 48.h,
+                child: TextField(
+                  enabled: false,
+                  cursorColor: Theme1.cursorColor,
+                  controller: controller.customPromptController,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
                   ),
-                  hintText: LocaleKeys.promptHits2.tr,
-                  hintStyle: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: .normal,
-                    color: Colors.black.withValues(alpha: 0.25),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 14.h,
+                      horizontal: 16.w,
+                    ),
+                    hintText: LocaleKeys.promptHits2.tr,
+                    hintStyle: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: .normal,
+                      color: Colors.white.withValues(alpha: 0.45),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withValues(alpha: 0.08),
+                    border: border,
+                    disabledBorder: border,
+                    enabledBorder: border,
                   ),
-                  filled: true,
-                  fillColor: Color(0x1AFFFFFF),
-                  border: border,
-                  disabledBorder: border,
-                  enabledBorder: border,
                 ),
               ),
             );

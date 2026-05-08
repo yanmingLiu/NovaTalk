@@ -78,7 +78,7 @@ class Theme1 {
     ),
   );
 
-  static Color primary = Color(0xffFBF05D);
+  static Color primary = Color(0xffFF96F7);
   static Color primary2 = Color(0xffFFEFB4);
   static Color cursorColor = Colors.white;
   static const List<Color> gradients = [Color(0xffFF4FAB), Color(0xffFF78D2)];
@@ -625,6 +625,27 @@ Widget buildBackIcon({Color? color}) {
   );
 }
 
-Widget buildCloseIcon() {
-  return Assets.imagesPhSheetClose.iv(width: 24.w);
+Widget buildCloseIcon({Color? color}) {
+  return Center(
+    child: Container(
+      width: 24.w,
+      height: 24.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFF131711).withValues(alpha: 0.30),
+        borderRadius: BorderRadius.circular(13.r),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.70),
+          width: 0.6,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.20),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: Icon(Icons.close,color: color,size: 16.w,),
+    ),
+  );
 }

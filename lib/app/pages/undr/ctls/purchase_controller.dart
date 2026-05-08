@@ -2,9 +2,7 @@ import 'package:novatalk/app/entities/sku.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/utils/log/log_event.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../../configs/constans.dart';
 
@@ -26,10 +24,11 @@ class PurchaseController extends GetxController {
     super.onInit();
     getPurchases();
   }
+
   @override
   void onReady() {
     super.onReady();
-    logEvent(args.isPayPhotoNum?"t_buyphotos":"t_buyvideos");
+    logEvent(args.isPayPhotoNum ? "t_buyphotos" : "t_buyvideos");
   }
 
   void getPurchases() async {
@@ -40,11 +39,11 @@ class PurchaseController extends GetxController {
     purchases.value = list;
   }
 
-
   String getPower(Sku sku) {
     return "${args.isPayPhotoNum ? sku.createImg : sku.createVideo}";
   }
-  String get getPayType  => args.isPayPhotoNum ? "Photo" : "Video";
+
+  String get getPayType => args.isPayPhotoNum ? "Photo" : "Video";
 
   String getUnitPrice(Sku sku) {
     if (sku.productDetails == null) return "";

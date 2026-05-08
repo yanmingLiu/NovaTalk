@@ -1,25 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:novatalk/app/utils/storage_util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
-import 'package:novatalk/app/configs/constans.dart';
-import 'package:novatalk/app/pages/vip/vip_view.dart';
-import 'package:novatalk/app/utils/app_user.dart';
-import 'package:novatalk/app/widgets/blur_background.dart';
-import 'package:hive/hive.dart';
 
 import '../../generated/assets.dart';
 import '../../generated/locales.g.dart';
-import '../pages/setting/setting_view.dart';
 import '../utils/common_utils.dart';
-import 'gradient_bound_painter.dart';
 import 'msg_gift_loading.dart';
 
 Widget get ex => const Spacer();
@@ -265,76 +256,157 @@ Future<void> showEditContentSheet({
     text: defTxt,
   );
   await Get.bottomSheet(
-    buildTheme2SheetRootWidget(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    SizedBox(
+      width: double.infinity,
+      height: 332.h,
+      child: Stack(
         children: [
-          20.verticalSpace,
-          Row(
-            children: [
-              Text(
-                title.val,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              // 8.horizontalSpace,
-              // Text("5 stars/edit",
-              //     style: TextStyle(
-              //         color: Color(0xFF808080),
-              //         fontSize: 11.sp,
-              //         fontWeight: FontWeight.w500)),
-            ],
-          ).marginOnly(bottom: 5.h),
-          Container(
-            padding: EdgeInsets.only(bottom: 8.h),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Color(0xffFBF05D), width: 1.w),
-              gradient: LinearGradient(
-                colors: [Color(0xffFFFBD8), Colors.white, Colors.white],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: TextField(
-              controller: textEditingController,
-              cursorColor: Theme1.cursorColor,
-              minLines: 2,
-              maxLines: 6,
-              maxLength: 500,
-              focusNode: focusNode,
-              style: TextStyle(color: Colors.black, fontSize: 14.sp),
-              decoration: InputDecoration(
-                hintStyle: TextStyle(
-                  color: Colors.black.withOpacity(0.4),
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                hintText: defHits,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+          Positioned(
+            left: 16.w,
+            top: 0,
+            child: TapBox(onTap: Get.closeBottomSheet, child: buildCloseIcon()),
           ),
-          10.verticalSpace,
-          buildTheme2BottomBtn(
-            done: () async {
-              if (onConfirmDismiss) {
-                Get.closeBottomSheet();
-              }
-              await onConfirm?.call(textEditingController.text);
-            },
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 44.h,
+            child: Container(
+              height: 280.h,
+              padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 20.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.6],
+                  colors: [Color(0xFFFFDFFD), Colors.white],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title.val,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  8.verticalSpace,
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 170.h,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7F7F7),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: TextField(
+                            controller: textEditingController,
+                            cursorColor: Colors.black,
+                            maxLines: null,
+                            expands: true,
+                            maxLength: 500,
+                            focusNode: focusNode,
+                            autofocus: true,
+                            textAlignVertical: TextAlignVertical.top,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.fromLTRB(
+                                12.w,
+                                10.h,
+                                12.w,
+                                10.h,
+                              ),
+                              hintStyle: TextStyle(
+                                color: Colors.black.withValues(alpha: 0.30),
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              hintText: defHits,
+                              counterText: '',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: _EditContentConfirmButton(
+                            onTap: () async {
+                              if (onConfirmDismiss) {
+                                Get.closeBottomSheet();
+                              }
+                              await onConfirm?.call(textEditingController.text);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-      ).marginSymmetric(horizontal: 16.w),
+      ),
     ),
+    isScrollControlled: true,
+    barrierColor: Colors.black.withValues(alpha: 0.68),
   );
   Future.delayed(Duration(milliseconds: 300), textEditingController.dispose);
+}
+
+class _EditContentConfirmButton extends StatelessWidget {
+  const _EditContentConfirmButton({required this.onTap});
+
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TapBox(
+      onTap: onTap,
+      child: Container(
+        width: 148.w,
+        height: 32.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24.r),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+          ),
+        ),
+        child: Text(
+          LocaleKeys.done.tr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Widget buildTheme2BottomBtn({
@@ -447,7 +519,7 @@ Future<void> showHelpUs() {
                           ),
                           8.verticalSpace,
                           buildTheme3Btn(
-                            bold:   true,
+                            bold: true,
                             title:
                                 (selectedItem != null &&
                                     contents.indexOf(selectedItem!) != 2)
@@ -493,7 +565,7 @@ Widget buildProcessView() {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 24.h,horizontal: 40.w),
+              padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 40.w),
               decoration: BoxDecoration(color: '#222222'.hex(0.6)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -508,7 +580,10 @@ Widget buildProcessView() {
                     ),
                   ).marginSymmetric(horizontal: 16.w),
                   30.verticalSpace,
-                  CircularProgressIndicator(strokeWidth: 4.r, color: cTheme.primary),
+                  CircularProgressIndicator(
+                    strokeWidth: 4.r,
+                    color: cTheme.primary,
+                  ),
                   20.verticalSpace,
                   Text(
                     LocaleKeys.aiCre.tr,
