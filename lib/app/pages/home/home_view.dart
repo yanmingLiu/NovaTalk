@@ -29,7 +29,6 @@ import '../../utils/common_utils.dart';
 import '../../utils/device_info.dart';
 import '../../widgets/gradient_bound_painter.dart';
 import '../setting/setting_view.dart';
-import '../undr/ai_photo/ai_photo_page.dart';
 import 'home_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -49,7 +48,8 @@ class HomeView extends GetBuildView<HomeController> {
           index: controller.currentTabIndex,
           children: [
             const HomeDiscoverView(),
-            CloUtil.isCloB ? const AiPhotoPage() : const PictureView(),
+            // CloUtil.isCloB ? const AiPhotoPage() :
+            const PictureView(),
             const ChatView(),
             const SettingView(),
           ],
@@ -73,23 +73,23 @@ class HomeView extends GetBuildView<HomeController> {
     }
 
     final msgTab = buildBottomNavigationBarItem(
-      Assets.imagesPhMainMsg,
-      Assets.imagesPhMainMsg2,
+      Assets.imagesIcMainMsg,
+      Assets.imagesIcMainMsg2,
     );
     final discoverTab = buildBottomNavigationBarItem(
-      Assets.imagesPhMainDiscover,
-      Assets.imagesPhMainDiscover2,
+      Assets.imagesIcMainDiscover,
+      Assets.imagesIcMainDiscover2,
     );
     final navigationItems = [
       discoverTab,
       buildBottomNavigationBarItem(
-        Assets.imagesPhMainCreate,
-        Assets.imagesPhMainCreate2,
+        Assets.imagesIcMainCreate,
+        Assets.imagesIcMainCreate2,
       ),
       msgTab,
       buildBottomNavigationBarItem(
-        Assets.imagesPhMainMe,
-        Assets.imagesPhMainMe2,
+        Assets.imagesIcMainMe,
+        Assets.imagesIcMainMe2,
       ),
     ];
     return ClipRRect(
@@ -265,10 +265,10 @@ Widget buildEmpty() {
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Assets.imagesPhDataEmpty.iv(height: 180.w),
+      Assets.imagesIcEmpty.iv(height: 130.w),
       LocaleKeys.noData.tv(
         style: tTheme.titleMedium?.copyWith(
-          color: Colors.black.withValues(alpha: 0.75),
+          color: Colors.white.withValues(alpha: 0.5),
         ),
       ),
     ],

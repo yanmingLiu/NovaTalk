@@ -327,7 +327,7 @@ class Locales {
     'endTime': 'Expires',
     'thi10': 'How comfortable are you with affection?',
     'prefs': 'Settings',
-    'create': 'Generate another one',
+    'create': 'Generate',
     'reportReceived': 'Report received',
     'copyright': 'Copyright infringement',
     'delChatHistoryHits': 'Delete history? Cannot be undone.',

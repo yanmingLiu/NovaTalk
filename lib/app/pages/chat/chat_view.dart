@@ -271,7 +271,7 @@ Widget _buildChatEmpty() {
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Assets.imagesPhDataEmpty.iv(height: 180.w),
+      Assets.imagesIcEmpty.iv(height: 180.w),
       LocaleKeys.noData.tv(
         style: tTheme.titleMedium?.copyWith(
           color: Colors.black.withValues(alpha: 0.75),

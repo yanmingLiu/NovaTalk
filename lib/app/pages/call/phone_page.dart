@@ -1,21 +1,14 @@
-import 'dart:ui';
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
-import 'package:novatalk/app/pages/chat/role_profile/role_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:novatalk/app/pages/call/phone_btn.dart';
 import 'package:novatalk/app/pages/call/phone_ctr.dart';
-import 'package:novatalk/app/pages/call/phone_title.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
 
 import '../../../generated/assets.dart';
-import '../../../generated/locales.g.dart';
 import '../../configs/constans.dart';
 import '../../entities/role_entity.dart';
 
@@ -32,213 +25,137 @@ class _PhonePageState extends State<PhonePage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.black,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: buildDefaultBg(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: (ctr.guideVideo?.gifUrl ?? ctr.role.avatar).iv(),
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(color: Colors.black.withOpacity(0.6)),
-              ),
-              // Positioned.fill(
-              //   child: Container(
-              //     decoration: const BoxDecoration(
-              //       gradient: LinearGradient(
-              //         begin: Alignment.topCenter,
-              //         end: Alignment.bottomCenter,
-              //         colors: [
-              //           Color(0xCC000000),
-              //           Color(0x001A1A1A),
-              //           Color(0x001A1A1A),
-              //           Color(0x801A1A1A),
-              //           Color(0xCC1A1A1A),
-              //         ],
-              //         stops: [0.1, 0.27, 0.43, 0.55, 0.99],
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              SafeArea(
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        buildBackIcon().marginOnly(left: 12.w),
-                        ex,
-                        Obx(
-                          () => ctr.showFormattedDuration.value
-                              ? Container(
-                                  margin: EdgeInsets.only(right: 12.w),
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 4.w,
-                                    horizontal: 12.w,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12.r),
-                                    color: Colors.black.withValues(alpha: 0.5),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 7.w,
-                                        height: 7.w,
-                                        margin: EdgeInsets.only(right: 6.w),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Color(0xffB0ECFD),
-                                        ),
-                                      ),
-                                      _buildTimer(),
-                                    ],
-                                  ),
-                                )
-                              : sh,
-                        ),
-                      ],
+        child: Stack(
+          children: [
+            Positioned.fill(child: _buildBackground()),
+            SafeArea(
+              child: Stack(
+                children: [
+                  Align(alignment: Alignment.topCenter, child: _buildTimer()),
+                  Positioned(
+                    right: 16.w,
+                    top: 11.h,
+                    child: TapBox(
+                      onTap: ctr.onTapHangup,
+                      child: buildCloseIcon(color: Colors.white),
                     ),
-                    SizedBox(height: 20.w),
-                    Expanded(
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(3.r),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.5),
-                                  width: 2.w,
-                                ),
-                              ),
-                              child: SizedBox.square(
-                                dimension: 88.r,
-                                child: ClipOval(child: ctr.role.avatar.iv()),
-                              ),
-                            ),
-                            16.verticalSpace,
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: Get.width/2,
-                              ),
-                              child: ctr.role.name.tv(
-                                maxLines: 1,
-                                style: TextStyle(
-                                  overflow: TextOverflow.ellipsis,
-                                  fontSize: 24.sp,
-                                  color: Colors.white,
-                                  fontWeight:  FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            12.verticalSpace,
-                            SizedBox(
-                                width: 28.w,
-                                child: buildAgeWidget(ctr.role.age))
-                          ],
-                        ),
-                      ),
-                    ),
-                    Obx(() => _buildLoading()),
-                    Obx(() {
+                  ),
+                  Positioned(
+                    top: 108.h,
+                    left: 0,
+                    right: 0,
+                    child: Center(child: _PhoneProfileCard(role: ctr.role)),
+                  ),
+                  Positioned(
+                    left: 16.w,
+                    right: 16.w,
+                    bottom: 168.h,
+                    child: Obx(() => _buildAnswering()),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 44.h,
+                    child: Obx(() {
                       ctr.callState.value;
-                      return _buildAnswering();
+                      return _buildControlButtons();
                     }),
-                    SizedBox(height: 30.w),
-                    Obx(
-                      () => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: _buildButtons(),
-                      ).paddingSymmetric(horizontal: 20.w),
-                    ),
-                    20.verticalSpace
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildLoading() {
-    if (ctr.callState.value == CallState.calling ||
-        ctr.callState.value == CallState.answering ||
-        ctr.callState.value == CallState.listening) {
-      return LoadingAnimationWidget.staggeredDotsWave(
-        color: Colors.white,
-        size: 40.w,
-      );
-    }
-    if (ctr.callState.value == CallState.micOff) {
-      return GestureDetector(
-        onTap: () => ctr.onTapMic(true),
-        child: Column(
+  Widget _buildBackground() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        (ctr.guideVideo?.gifUrl ?? ctr.role.avatar).iv(fit: BoxFit.cover),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.80),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimer() {
+    return Obx(() {
+      final text = ctr.showFormattedDuration.value
+          ? ctr.formattedDuration(ctr.callDuration.value)
+          : '00:00';
+      return Container(
+        height: 32.h,
+        margin: EdgeInsets.only(top: 7.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Assets.imagesPhPhoneMic.iv(
-              width: 42.w,
-              height: 42.w,
-              color: Colors.white,
+            Container(
+              width: 8.w,
+              height: 8.w,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF4747),
+                shape: BoxShape.circle,
+              ),
             ),
+            4.horizontalSpace,
             Text(
-              LocaleKeys.pressConti.tr,
+              text,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
       );
-    }
-    return Container();
-  }
-
-  Widget _buildTimer() {
-    if (ctr.showFormattedDuration.value) {
-      return Text(
-        ctr.formattedDuration(ctr.callDuration.value),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
-        ),
-      );
-    }
-    return Container();
+    });
   }
 
   Widget _buildAnswering() {
     final text = ctr.callStateDescription(ctr.callState.value);
     if (text.isEmpty) {
-      return Container();
+      return sh;
     }
 
-    return SizedBox(
-      width: Get.width - 60,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFF262626).withValues(alpha: 0.50),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
       child: Center(
         child: DefaultTextStyle(
           style: TextStyle(
             color: Colors.white,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            height: 1.25,
           ),
+          textAlign: TextAlign.center,
           child: AnimatedTextKit(
-            key: ValueKey(ctr.callState.value),
+            key: ValueKey('${ctr.callState.value}-$text'),
             totalRepeatCount: 1,
             animatedTexts: [
               TypewriterAnimatedText(
                 text,
                 speed: const Duration(milliseconds: 50),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -247,60 +164,214 @@ class _PhonePageState extends State<PhonePage> with RouteAware {
     );
   }
 
-  List<Widget> _buildButtons() {
-    final asColor = Color(0xff78D5FA);
-    List<Widget> buttons = [
-      PhoneBtn(
-        icon: Assets.imagesPhPhoneHangup.iv(width: 28.w),
-        title: '',
-        color: hangupColor,
-        onTap: ctr.onTapHangup,
+  Widget _buildControlButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _CallControlButton(
+          backgroundColor: hangupColor,
+          icon: Assets.imagesIcCallHangup.iv(
+            width: 32.w,
+            height: 32.w,
+            fit: BoxFit.contain,
+          ),
+          onTap: ctr.onTapHangup,
+        ),
+        117.horizontalSpace,
+        _buildPrimaryActionButton(),
+      ],
+    );
+  }
+
+  Widget _buildPrimaryActionButton() {
+    final state = ctr.callState.value;
+    if (state == CallState.incoming) {
+      return _CallControlButton(
+        backgroundColor: answerColor,
+        icon: Assets.imagesIcCallAnswer.iv(
+          width: 32.w,
+          height: 32.w,
+          fit: BoxFit.contain,
+        ),
+        onTap: ctr.onTapAccept,
+      );
+    }
+    if (state == CallState.listening) {
+      return _CallControlButton(
+        backgroundColor: const Color(0xFF4CDA64),
+        outerColor: const Color(0xFF4CDA64).withValues(alpha: 0.30),
+        innerSize: 52.w,
+        innerRadius: 12.r,
+        icon: Assets.imagesIcCallMic.iv(
+          width: 32.w,
+          height: 32.w,
+          color: Colors.white,
+          fit: BoxFit.contain,
+        ),
+        onTap: () => ctr.onTapMic(false),
+      );
+    }
+    return _CallControlButton(
+      backgroundColor: const Color(0xFFE6E6E6),
+      icon: Icon(Icons.mic_off_outlined, color: Colors.black, size: 32.w),
+      onTap: () => ctr.onTapMic(true),
+    );
+  }
+}
+
+class _PhoneProfileCard extends StatelessWidget {
+  const _PhoneProfileCard({required this.role});
+
+  final RoleRecords role;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20.r),
       ),
-    ];
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 80.w,
+            height: 80.w,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 4.w,
+                  top: 4.w,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16.r),
+                    child: role.avatar.iv(
+                      width: 72.w,
+                      height: 72.w,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20.r),
+                      border: Border.all(color: const Color(0xFFFF96F7)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          12.verticalSpace,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 108.w),
+                child: Text(
+                  role.name ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (role.age != null) ...[
+                4.horizontalSpace,
+                _CallAgeBadge(age: role.age!),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-    if (ctr.callState.value == CallState.incoming) {
-      buttons.add(
-        PhoneBtn(
-          icon: Assets.imagesPhPhoneAnswer.iv(width: 28.w),
-          title: '',
-          color: answerColor,
-          iconColor: Colors.white,
-          animationColor: Colors.transparent,
-          onTap: ctr.onTapAccept,
+class _CallAgeBadge extends StatelessWidget {
+  const _CallAgeBadge({required this.age});
+
+  final int age;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 14.h,
+      padding: EdgeInsets.symmetric(horizontal: 6.w),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24.r),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
         ),
-      );
-    }
-
-    if (ctr.callState.value == CallState.listening) {
-      buttons.add(
-        PhoneBtn(
-          icon: Assets.imagesPhPhoneMic2.iv(width: 28.w,color: Colors.black),
-          title: '',
-          color: asColor,
-          iconColor: Colors.white,
-          animationColor: asColor,
-          onTap: () => ctr.onTapMic(false),
+      ),
+      child: '$age'.tv(
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w600,
+          height: 1,
         ),
-      );
-    }
+      ),
+    );
+  }
+}
 
-    if (ctr.callState.value == CallState.answering ||
-        ctr.callState.value == CallState.micOff ||
-        ctr.callState.value == CallState.answered) {
-      buttons.add(
-        PhoneBtn(
-          icon: ctr.callState.value == CallState.micOff
-              ? Assets.imagesPhPhoneMic2.iv(width: 28.w,color: Colors.white)
-              : Assets.imagesPhPhoneMic.iv(width: 28.w),
-          title: '',
-          color: Colors.black.withValues(alpha: 0.5),
-          iconColor: Colors.white,
-          onTap: () => ctr.onTapMic(true),
+class _CallControlButton extends StatelessWidget {
+  const _CallControlButton({
+    required this.backgroundColor,
+    required this.icon,
+    required this.onTap,
+    this.outerColor,
+    this.innerSize,
+    this.innerRadius,
+  });
+
+  final Color backgroundColor;
+  final Color? outerColor;
+  final Widget icon;
+  final VoidCallback onTap;
+  final double? innerSize;
+  final double? innerRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return TapBox(
+      onTap: onTap,
+      child: SizedBox(
+        width: 64.w,
+        height: 64.w,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 64.w,
+              height: 64.w,
+              decoration: BoxDecoration(
+                color: outerColor ?? backgroundColor,
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+            ),
+            Container(
+              width: innerSize ?? 64.w,
+              height: innerSize ?? 64.w,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(innerRadius ?? 16.r),
+              ),
+              child: icon,
+            ),
+          ],
         ),
-      );
-    }
-
-    return buttons;
+      ),
+    );
   }
 }
 
@@ -325,11 +396,11 @@ Widget topRoleInfoView(RoleRecords role) {
         ),
       ),
       6.horizontalSpace,
-      SizedBox(width: 27.w, height: 16.h, child: buildAgeWidget(5)),
+      if (role.age != null) _CallAgeBadge(age: role.age!),
       // PhoneTitle(role: role)
     ],
   ).paddingOnly(bottom: 4.h);
 }
 
 const hangupColor = Color(0xffE2266C);
-const answerColor = Color(0xffFBF05D);
+const answerColor = Color(0xff4CDA64);

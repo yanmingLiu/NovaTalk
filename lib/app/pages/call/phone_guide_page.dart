@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:novatalk/app/pages/call/phone_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
-import 'package:novatalk/app/pages/call/phone_btn.dart';
 import 'package:novatalk/app/utils/app_user.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -156,9 +156,8 @@ class _PhoneGuidePageState extends State<PhoneGuidePage>
     if (_phoneStateSub != null) {
       return;
     }
-    bool havePermission = true;
     if (Platform.isAndroid) {
-      havePermission = await requestPermission() ?? true;
+      await requestPermission();
     }
     // if (havePermission) {
     //   _phoneStateSub = PhoneState.stream.listen((event) {
@@ -170,10 +169,12 @@ class _PhoneGuidePageState extends State<PhoneGuidePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: buildDefaultBg(
+      backgroundColor: Colors.black,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
         child: Stack(
           children: [
-            Positioned.fill(child: role.avatar.iv()),
+            Positioned.fill(child: role.avatar.iv(fit: BoxFit.cover)),
             FutureBuilder(
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
@@ -189,26 +190,15 @@ class _PhoneGuidePageState extends State<PhoneGuidePage>
                     ),
                   );
                 } else {
-                  // 在加载时显示进度指示器
                   return Center(
                     child: CircularProgressIndicator(color: cTheme.primary),
                   );
                 }
               },
             ),
-            IgnorePointer(
-              child: Container(
-                height: Get.height,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.2),
-                      Colors.black.withOpacity(0.2),
-                    ],
-                  ),
-                ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ColoredBox(color: Colors.black.withValues(alpha: 0.25)),
               ),
             ),
             Obx(() {
@@ -221,27 +211,11 @@ class _PhoneGuidePageState extends State<PhoneGuidePage>
               }
               return _buildWaitingView();
             }),
-
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(20.w),
-              ),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.9),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                  child: SafeArea(bottom: false, child: topRoleInfoView(role)),
-                ),
-              ),
+            Positioned(
+              left: 16.w,
+              right: 16.w,
+              top: MediaQuery.paddingOf(context).top + 5.h,
+              child: _buildTopBar(),
             ),
           ],
         ),
@@ -250,185 +224,327 @@ class _PhoneGuidePageState extends State<PhoneGuidePage>
   }
 
   Widget _buildButtons() {
-    List<Widget> buttons = [
-      PhoneBtn(
-        icon: Assets.imagesPhPhoneHangup.iv(width: 28.w),
-        title: '',
-        color:hangupColor,
-        onTap: () => Get.back(),
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 64.h,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _GuideCallButton(
+            color: const Color(0xFFFF4747),
+            icon: Assets.imagesIcCallHangup.iv(
+              width: 32.w,
+              height: 32.w,
+              fit: BoxFit.contain,
+            ),
+            onTap: () => Get.back(),
+          ),
+          91.horizontalSpace,
+          _GuideCallButton(
+            color: answerColor,
+            icon: Assets.imagesIcCallAnswer.iv(
+              width: 32.w,
+              height: 32.w,
+              fit: BoxFit.contain,
+            ),
+            onTap: () {
+              if (AppUser.inst.balance.value < ConsumeFrom.call.gems) {
+                pushGem(ConsumeFrom.call);
+                return;
+              }
+              offPhone(role: role, showVideo: true);
+            },
+          ),
+        ],
       ),
-      PhoneBtn(
-        icon: Assets.imagesPhPhoneAnswer.iv(width: 28.w),
-        title: '',
-        color: answerColor,
-        iconColor: Colors.white,
-        animationColor: Colors.transparent,
-        onTap: () {
-          if (AppUser.inst.balance.value < ConsumeFrom.call.gems) {
-            pushGem(ConsumeFrom.call);
-            return;
-          }
-          offPhone(role: role, showVideo: true);
-        },
-      ),
-    ];
-
-    return Column(
-      children: [
-        Expanded(child: Container()),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: buttons,
-        ),
-        SizedBox(height: 60.w),
-      ],
     );
   }
 
   Widget _buildVipVideoView() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: buildTheme1SheetRootWidget(
-        onClose:  () {
-          Get.back();
-        },
-        showClose: true,
-        bgColor: Colors.black.withValues(alpha: 0.75),
-        child: SafeArea(
-          top: false,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ColoredBox(color: Colors.black.withValues(alpha: 0.45)),
+        ),
+        Positioned(
+          left: 16.w,
+          right: 16.w,
+          bottom: 42.h,
           child: SizedBox(
-            width: Get.width,
-            height: 209.h,
+            height: 311.h,
             child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomCenter,
               children: [
-                Assets.imagesBgkStar.iv(),
-                Positioned.fill(
-                  left: 20.w,
-                  right: 20.w,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          20.verticalSpace,
-                          Text(
-                            LocaleKeys.claim.tr,
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    height: 231.h,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: SvgPicture.asset(
+                            Assets.imagesBgPhoneGuideVipCard,
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                        Positioned(
+                          left: 28.w,
+                          right: 28.w,
+                          top: 60.h,
+                          child: Text(
+                            LocaleKeys.claim.tr.replaceAll('\n', ' '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24.sp,
-                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                          SizedBox(height: 10.w),
-                          SizedBox(
-                            width: 190.w,
-                            child: Text(
-                              LocaleKeys.interactiveAI.tr,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                                height: 1.7
-                              ),
+                        ),
+                        Positioned(
+                          left: 28.w,
+                          right: 28.w,
+                          top: 107.h,
+                          child: Text(
+                            LocaleKeys.interactiveAI.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          ex,
-                          buildTheme3Btn(
-                            bold: true,
-                            alignment: Alignment.center,
+                        ),
+                        Positioned(
+                          left: 46.5.w,
+                          right: 46.5.w,
+                          bottom: 31.h,
+                          child: TapBox(
                             onTap: () {
                               pushVip(VipFrom.call);
                               logEvent('c_unlock_videocall');
                             },
-                            title: LocaleKeys.proceed.tr,
+                            child: Container(
+                              height: 44.h,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24.r),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xFFFFDFFD),
+                                    Color(0xFFFF96F7),
+                                  ],
+                                ),
+                              ),
+                              child: LocaleKeys.proceed.tr.tv(
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      Positioned(
-                        right: -35.w,
-                        child: Assets.imagesPhGem3.iv(width: 170.w),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-
+                Positioned(
+                  left: 9.w,
+                  top: 1.h,
+                  child: Image.asset(
+                    Assets.imagesPhPhoneGuideVipDiamond,
+                    width: 145.w,
+                    height: 145.w,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Positioned(
+                  left: 131.w,
+                  top: 68.h,
+                  child: Transform.rotate(
+                    angle: 0.2773,
+                    child: Image.asset(
+                      Assets.imagesPhPhoneGuideVipStar,
+                      width: 55.w,
+                      height: 57.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildTopBar() {
+    return SizedBox(
+      width: Get.width - 32.w,
+      height: 36.h,
+      child: Row(
+        children: [
+          _GuideRolePill(role: role),
+          const Spacer(),
+          TapBox(
+            onTap: () => Get.back(),
+            child: buildCloseIcon(color: Colors.white),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildWaitingView() {
-    // if (_controller?.value.isPlaying ?? false) {
-    //   return SafeArea(
-    //     child: Column(
-    //       children: [
-    //         Text(
-    //           role.name ?? '',
-    //           textAlign: TextAlign.center,
-    //           style: TextStyle(
-    //             color: Colors.white,
-    //             fontSize: 23.sp,
-    //             fontWeight: FontWeight.w600,
-    //           ),
-    //         ),
-    //         SizedBox(height: 16.w),
-    //         Text(
-    //           LocaleKeys.wantsYouVde.tr,
-    //           textAlign: TextAlign.center,
-    //           style: TextStyle(
-    //             color: Colors.white,
-    //             fontSize: 14.sp,
-    //             fontWeight: FontWeight.w600,
-    //           ),
-    //         ),
-    //         Expanded(child: Container()),
-    //         PhoneBtn(
-    //           icon: Assets.imagesIcPhoneAh.iv(width: 40.w),
-    //           title: '',
-    //           color: const Color(0xFFFA5151),
-    //           onTap: () => Get.back(),
-    //         ),
-    //         SizedBox(height: 60.w),
-    //       ],
-    //     ),
-    //   );
-    // }
-    return SafeArea(
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 64.h,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: Container()),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.w),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 6.h),
-                decoration: BoxDecoration(color: Color(0x26000000)),
-                child: Text(
-                  LocaleKeys.wantsYouVde.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+          Container(
+            width: 219.w,
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF262626).withValues(alpha: 0.50),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Text(
+              LocaleKeys.wantsYouVde.tr,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          25.verticalSpace,
-          PhoneBtn(
-            icon: Assets.imagesPhPhoneHangup.iv(width: 28.w),
-            title: '',
-            color: const Color(0xffE2266C),
+          40.verticalSpace,
+          _GuideCallButton(
+            color: const Color(0xFFFF4747),
+            icon: Assets.imagesIcCallHangup.iv(
+              width: 32.w,
+              height: 32.w,
+              fit: BoxFit.contain,
+            ),
             onTap: () => Get.back(),
           ),
-          SizedBox(height: 60.w),
         ],
+      ),
+    );
+  }
+}
+
+class _GuideRolePill extends StatelessWidget {
+  const _GuideRolePill({required this.role});
+
+  final RoleRecords role;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36.h,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipOval(
+            child: role.avatar.iv(width: 36.w, height: 36.w, fit: BoxFit.cover),
+          ),
+          8.horizontalSpace,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 104.w),
+            child: Text(
+              role.name ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          if (role.age != null) ...[
+            4.horizontalSpace,
+            _CallAgeBadge(age: role.age!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CallAgeBadge extends StatelessWidget {
+  const _CallAgeBadge({required this.age});
+
+  final int age;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 14.h,
+      padding: EdgeInsets.symmetric(horizontal: 6.w),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24.r),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+        ),
+      ),
+      child: '$age'.tv(
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w600,
+          height: 1,
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideCallButton extends StatelessWidget {
+  const _GuideCallButton({
+    required this.color,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final Color color;
+  final Widget icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TapBox(
+      onTap: onTap,
+      child: Container(
+        width: 64.w,
+        height: 64.w,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: icon,
       ),
     );
   }

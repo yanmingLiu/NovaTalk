@@ -1,17 +1,25 @@
-import 'package:novatalk/app/pages/undr/undr_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:novatalk/app/configs/constans.dart';
+import 'package:novatalk/app/entities/create_style_bean.dart';
+import 'package:novatalk/app/routes/app_pages.dart';
+import 'package:novatalk/app/utils/app_user.dart';
+import 'package:novatalk/app/utils/common_utils.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
 import 'package:novatalk/app/widgets/release_text_edit_focus.dart';
 import 'package:novatalk/generated/assets.dart';
 import 'package:novatalk/generated/locales.g.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:get/get.dart';
-
-import '../../../configs/app_theme.dart';
-import '../../../entities/create_style_bean.dart';
-import '../../../routes/app_pages.dart';
 import 'picture_controller.dart';
+
+const _pictureAccent = Color(0xFFFF96F7);
+const _pictureAccentLight = Color(0xFFFFDFFD);
+const _pictureClearIcon = 'library/images/ic_picture_clear.webp';
+const _pictureCreationsIcon = 'library/images/ic_picture_c.webp';
+
+Color get _picturePanel => Colors.white.withValues(alpha: 0.10);
 
 class PictureView extends GetView<PictureController> {
   const PictureView({super.key});
@@ -19,566 +27,825 @@ class PictureView extends GetView<PictureController> {
   @override
   Widget build(BuildContext context) {
     return ReleaseTextEditFocus(
-      child: Scaffold(
-        body: buildDefaultBg(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
             children: [
-              buildAppbar(),
-              Expanded(
-                child: Stack(
-                  children: [
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          buildDescription(),
-                          buildTheme(),
-                          buildCount(),
-                          buildRatio(),
-                          buildSubmit(),
-                          20.verticalSpace,
-                        ],
-                      ),
-                    ),
-                    Obx(()=> controller.generating.value? buildProcessView():sh)
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildAppbar() {
-    return SafeArea(
-      child: Row(
-        children: [
-          DefaultTabController(
-            length: 1,
-            child: buildHomeTitleTabBar(
-              tabs: [Tab(text: LocaleKeys.appLabel.tr)],
-            ),
-          ),
-          ex,
-          TapBox(
-            onTap: () {
-              Get.toNamed(Routes.CREATIONS);
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-              decoration: BoxDecoration(
-                color: Color(0xFFFBF05D),
-                border: Border.all(
-                  color: Color(0xFFC3B600).withValues(alpha: 0.25),
-                  width: 1.r,
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(10.r)),
-              ),
-              child: LocaleKeys.creations.tv(
-                style: tTheme.bodyLarge?.copyWith(color: Colors.black),
-              ),
-            ),
-          ),
-          8.horizontalSpace,
-          buildGemWidget(),
-          12.horizontalSpace,
-        ],
-      ),
-    );
-  }
-
-  Widget buildDescription() {
-    return Container(
-      margin: EdgeInsets.only(left: 12.w, right: 12.w, top: 20.h),
-      decoration: BoxDecoration(
-        border: Border.all(color: cTheme.scrim, width: 1.r),
-        borderRadius: BorderRadius.all(Radius.circular(12.r)),
-        color: Colors.white,
-      ),
-      child: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(
-                  left: 12.w,
-                  top: 10.h,
-                  bottom: 12.h,
-                  right: 12.w,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(12.r),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFFEFBD6), Color(0xFFFFFBDA)],
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    LocaleKeys.inputDescription.tv(
-                      style: tTheme.bodyMedium?.copyWith(
-                        color: Color(0xff595959),
-                        fontSize: 12.sp,
-                        fontWeight:  FontWeight.w500,
-                        height: 1,
-                      ),
-                    ),
-                    ex,
-                    TapBox(
-                      onTap: () {
-                        controller.clearPrompt();
-                      },
-                      padding: EdgeInsets.all(2.r),
-                      child: Assets.imagesPhDelete.iv(width: 14.w),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 123.h,
-                child: RawScrollbar(
-                  controller: controller.scrollController,
-                  thumbVisibility: true,
-                  thickness: 4.w,
-                  radius: Radius.circular(2.r),
-                  thumbColor: Color(0xFFEDEDED),
-                  padding: EdgeInsets.only(top: 4.h),
-                  child: Obx(
-                    () => TextField(
-                      scrollController: controller.scrollController,
-                      controller: controller.promptTextController,
-                      maxLines: null,
-                      minLines: 4,
-                      keyboardType: TextInputType.multiline,
-                      textAlignVertical: TextAlignVertical.top,
-                      style: tTheme.bodyLarge?.copyWith(color: Colors.black),
-                      maxLength: 500,
-                      buildCounter:
-                          (
-                            BuildContext context, {
-                            int? currentLength,
-                            int? maxLength,
-                            bool? isFocused,
-                          }) {
-                            return Padding(
-                              padding: EdgeInsets.only(top: 10.h, bottom: 8.h),
-                              child: Text(
-                                '$currentLength/$maxLength',
-                                style: TextStyle(
-                                  color: currentLength == maxLength
-                                      ? Color(0xFFDF0B77)
-                                      : Color(0xFFCDCDCD),
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            );
-                          },
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 4.h,
-                        ),
-                        border: InputBorder.none,
-                        hintText: controller.initPrompt.value,
-                        hintMaxLines: 4,
-                        hintStyle: tTheme.bodyLarge?.copyWith(
-                          color: Color(0xFFCDCDCD),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ).marginOnly(bottom: 12.h),
-            ],
-          ),
-          TapBox(
-            onTap: () {
-              controller.aiWrite();
-            },
-            child: Container(
-              margin: EdgeInsets.only(left: 12.w, bottom: 12.h),
-              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.5.h),
-              decoration: BoxDecoration(
-                color: cTheme.scrim.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.all(Radius.circular(10.r)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              const _PictureTopGlow(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Assets.imagesPhAiWrite.iv(width: 10.w),
-                  LocaleKeys.aiWrite.tv(
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF262626),
+                  _buildHeader(),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        SingleChildScrollView(
+                          padding: EdgeInsets.only(
+                            left: 16.w,
+                            right: 16.w,
+                            top: 20.h,
+                            bottom:
+                                MediaQuery.paddingOf(context).bottom + 150.h,
+                          ),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildDescription(),
+                              20.verticalSpace,
+                              _PictureThemeSection(controller: controller),
+                              20.verticalSpace,
+                              _buildCount(),
+                              20.verticalSpace,
+                              _buildRatio(),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: MediaQuery.paddingOf(context).bottom + 40.h,
+                          child: Center(child: _buildSubmit()),
+                        ),
+                        Obx(
+                          () => controller.generating.value
+                              ? buildProcessView()
+                              : sh,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget buildTheme() {
-    Widget buildStyleView(List<CreateStyleBean> styles) {
-      return Container(
-        height: 108.h,
-        child: ListView.separated(
-          padding: EdgeInsets.symmetric(horizontal: 13.w),
-          scrollDirection: Axis.horizontal,
-          itemCount: styles.length,
-          separatorBuilder: (context, index) {
-            return 6.5.horizontalSpace;
-          },
-          itemBuilder: (context, index) {
-            final style = styles[index];
-            final isSelected = controller.selectedStyle == style;
-            return TapBox(
-              onTap: () {
-                controller.selectStyle(style);
-              },
+  Widget _buildHeader() {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 7.h),
+        child: Row(
+          children: [
+            TapBox(
+              onTap: () => pushGem(ConsumeFrom.home),
               child: Container(
+                height: 32.h,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(
-                  color: isSelected?Colors.white:Color(0xFFFAFAFA),
-                  borderRadius: BorderRadius.all(Radius.circular(12.r)),
-                  border: Border.all(
-                    color: isSelected ? cTheme.scrim : Colors.transparent,
-                    width: 1.w,
-                  ),
+                  color: _picturePanel,
+                  borderRadius: BorderRadius.circular(18.r),
                 ),
-                child: Column(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(12.r)),
-                      child: style.cover.iv(width: 80.w, height: 80.w),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 3.w),
-                          child: style.name.tv(
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF434343),
-                            ),
-                          ),
+                    Assets.imagesIcGem.iv(width: 20.w, height: 20.w),
+                    4.horizontalSpace,
+                    Obx(
+                      () => AppUser.inst.balance.value.tv(
+                        style: TextStyle(
+                          color: const Color(0xFFC7ABFF),
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-            );
-          },
-        ),
-      );
-    }
-
-
-    return Obx(() {
-      final List<CreateStyleBean> styles = controller.styleList.value;
-      styles.where((v) => v.styleType == 0);
-      List<CreateStyleBean> real = [];
-      List<CreateStyleBean> fantasy = [];
-      for (var n in styles) {
-        if (n.styleType == 0) {
-          real.add(n);
-        } else {
-          fantasy.add(n);
-        }
-      }
-      return DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            15.verticalSpace,
-            buildHomeTabBar(
-              padding: EdgeInsets.symmetric(horizontal: 5.w),
-              labelPadding: EdgeInsets.symmetric(horizontal: 10.w),
-              onTap: (index) {
-                controller.styleList.refresh();
-              },
-              labelStyle: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black.withValues(alpha: 0.68),
-              ),
-              tabs: [
-                Tab(text: LocaleKeys.real.tr),
-                Tab(text: LocaleKeys.fantasy.tr),
-              ],
             ),
-            6.verticalSpace,
-            Builder(
-              builder: (context) {
-                final index = DefaultTabController.of(context).index;
-                return IndexedStack(
-                  index: index,
-                  children: [buildStyleView(real), buildStyleView(fantasy)],
-                );
+            const Spacer(),
+            TapBox(
+              onTap: () {
+                Get.toNamed(Routes.CREATIONS);
               },
+              child: Container(
+                width: 102.w,
+                height: 32.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _picturePanel,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _pictureCreationsIcon.iv(
+                      width: 20.w,
+                      height: 20.w,
+                      fit: BoxFit.contain,
+                    ),
+                    4.horizontalSpace,
+                    LocaleKeys.creations.tr.tv(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: const Color(0xFFF5F5F5),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        height: 20 / 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 
-  Widget buildCount() {
-    return Row(
-      children: [
-        LocaleKeys.numImages.tv(
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-        ),
-        ex,
-        Container(
-          width: 162.w,
-          height: 50.h,
-          padding: EdgeInsets.symmetric(horizontal: 8.w),
-          decoration: BoxDecoration(
-            border: Border.all(color: Color(0xFFFAFAFA), width: 1.w),
-            borderRadius: BorderRadius.all(Radius.circular(12.r)),
-          ),
-          child: Obx(
-            () => Row(
+  Widget _buildDescription() {
+    return Container(
+      width: double.infinity,
+      height: 172.h,
+      padding: EdgeInsets.all(12.r),
+      decoration: BoxDecoration(
+        color: _picturePanel,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 24.h,
+            child: Row(
               children: [
-                TapBox(
-                  padding: EdgeInsets.all(4.r),
-                  onTap: () {
-                    if (controller.count > 1) {
-                      controller.count.value--;
-                    }
-                  },
-                  child:
-                      (controller.count.value > 1
-                              ? Assets.imagesPhCountReduce2
-                              : Assets.imagesPhCountReduce)
-                          .iv(width: 20.w),
+                LocaleKeys.inputDescription.tr.tv(
+                  style: TextStyle(
+                    color: const Color(0xFFF5F5F5),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                Expanded(
-                  child: Center(
-                    child: controller.count.value.tv(
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                const Spacer(),
+                TapBox(
+                  onTap: controller.clearPrompt,
+                  child: SizedBox(
+                    width: 24.w,
+                    height: 24.w,
+                    child: Center(
+                      child: _pictureClearIcon.iv(
+                        width: 24.w,
+                        height: 24.w,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          8.verticalSpace,
+          Container(
+            height: 84.h,
+            decoration: BoxDecoration(
+              color: _picturePanel,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: RawScrollbar(
+              controller: controller.scrollController,
+              thumbVisibility: true,
+              thickness: 3.w,
+              radius: Radius.circular(2.r),
+              thumbColor: Colors.white.withValues(alpha: 0.25),
+              padding: EdgeInsets.symmetric(vertical: 6.h),
+              child: Obx(
+                () => TextField(
+                  scrollController: controller.scrollController,
+                  controller: controller.promptTextController,
+                  cursorColor: _pictureAccent,
+                  maxLength: 500,
+                  minLines: 4,
+                  maxLines: 4,
+                  keyboardType: TextInputType.multiline,
+                  textAlignVertical: TextAlignVertical.top,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  buildCounter:
+                      (
+                        BuildContext context, {
+                        int? currentLength,
+                        int? maxLength,
+                        bool? isFocused,
+                      }) {
+                        return const SizedBox.shrink();
+                      },
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 8.h),
+                    border: InputBorder.none,
+                    hintText: controller.initPrompt.value,
+                    hintMaxLines: 4,
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.30),
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          8.verticalSpace,
+          SizedBox(
+            height: 24.h,
+            child: Row(
+              children: [
                 TapBox(
-                  padding: EdgeInsets.all(4.r),
-                  onTap: () {
-                    if (controller.count.value >= 4) {
-                      return;
-                    }
-                    controller.count.value++;
+                  onTap: controller.aiWrite,
+                  child: Container(
+                    height: 24.h,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24.r),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [_pictureAccentLight, _pictureAccent],
+                      ),
+                    ),
+                    child: LocaleKeys.aiWrite.tr.tv(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: controller.promptTextController,
+                  builder: (context, value, child) {
+                    return '${value.text.length}/500'.tv(
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.50),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    );
                   },
-                  child:
-                      (controller.count.value < 4
-                              ? Assets.imagesPhCountAdd2
-                              : Assets.imagesPhCountAdd)
-                          .iv(width: 20.w),
                 ),
               ],
             ),
           ),
-        ),
-      ],
-    ).marginSymmetric(horizontal: 12.w, vertical: 20.h);
+        ],
+      ),
+    );
   }
 
-  Widget buildRatio() {
-    final ratios = [
-      (value: "1:1", ui: 1.0, title: LocaleKeys.square, width: 28.0.w),
-      (value: "9:16", ui: 9 / 14, title: LocaleKeys.igStore, width: 30.0.w),
-      (
-        value: "9:19",
-        ui: 9 / 14,
-        title: LocaleKeys.igFullscreen,
-        width: 30.0.w,
-      ),
-      (value: "4:3", ui: 1.33, title: LocaleKeys.socialMedia, width: 26.0.w),
-    ];
-    ui:
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildCount() {
+    return Row(
       children: [
-        LocaleKeys.imageRatio
-            .tv(
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                height: 1,
-                color: Colors.black,
-              ),
-            )
-            .marginOnly(left: 12.w),
-        12.verticalSpace,
-        SizedBox(
-          height: 100.h,
-          width: Get.width,
-          child: Obx(() {
-            controller.ratio.value;
-            return ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                final ratio = ratios[index];
-                final isSelected = controller.ratio.value == ratio.value;
-                return TapBox(
-                  onTap: () {
-                    controller.ratio.value = ratio.value;
-                  },
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: 80.w,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 76.h,
-                                padding: EdgeInsets.only(top: 15.h),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(12.r),
-                                  ),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? cTheme.scrim
-                                        : Color(0xFFFAFAFA),
-                                    width: 1.w,
-                                  ),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      margin: EdgeInsets.symmetric(
-                                        horizontal: ratio.width,
-                                      ),
-                                      child: AspectRatio(
-                                        aspectRatio: ratio.ui,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(6.r),
-                                            ),
-                                            border: Border.all(
-                                              color: Color(0xFF8C8C8C),
-                                              width: 2.5.w,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    ex,
-                                    Text(
-                                      "${ratio.value}",
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    8.verticalSpace,
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      ratio.title.tv(
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                          color: isSelected ? Colors.black : Color(0xFF8C8C8C),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              separatorBuilder: (context, index) => 10.horizontalSpace,
-              itemCount: ratios.length,
-            );
-          }),
+        LocaleKeys.numImages.tr.tv(
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        const Spacer(),
+        Obx(() {
+          final count = controller.count.value;
+          return Container(
+            width: 120.w,
+            height: 24.h,
+            decoration: BoxDecoration(
+              color: _picturePanel,
+              borderRadius: BorderRadius.circular(4.r),
+            ),
+            child: Row(
+              children: [
+                _PictureStepButton(
+                  icon: _PictureStepIcon.minus,
+                  enabled: count > 1,
+                  onTap: () {
+                    if (controller.count.value > 1) {
+                      controller.count.value--;
+                    }
+                  },
+                ),
+                Expanded(
+                  child: Center(
+                    child: count.tv(
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                _PictureStepButton(
+                  icon: _PictureStepIcon.plus,
+                  enabled: count < 4,
+                  onTap: () {
+                    if (controller.count.value < 4) {
+                      controller.count.value++;
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
 
-  Widget buildSubmit() {
-    return buildTheme3Btn(
-      onTap: () {
-        controller.create();
-      },
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(left: 12.w, right: 12.w, top: 20.h),
-      titleWidget: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildRatio() {
+    final ratios = [
+      _PictureRatioData(
+        value: '1:1',
+        title: LocaleKeys.square,
+        iconWidth: 14.w,
+        iconHeight: 14.w,
+      ),
+      _PictureRatioData(
+        value: '9:16',
+        title: LocaleKeys.igStore,
+        iconWidth: 12.w,
+        iconHeight: 15.h,
+      ),
+      _PictureRatioData(
+        value: '9:19',
+        title: LocaleKeys.igFullscreen,
+        iconWidth: 11.w,
+        iconHeight: 15.h,
+      ),
+      _PictureRatioData(
+        value: '4:3',
+        title: LocaleKeys.socialMedia,
+        iconWidth: 13.w,
+        iconHeight: 15.h,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LocaleKeys.imageRatio.tr.tv(
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        12.verticalSpace,
+        Obx(() {
+          controller.ratio.value;
+          return Row(
+            children: List.generate(ratios.length, (index) {
+              final ratio = ratios[index];
+              final selected = controller.ratio.value == ratio.value;
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index == ratios.length - 1 ? 0 : 5.w,
+                ),
+                child: TapBox(
+                  onTap: () {
+                    controller.ratio.value = ratio.value;
+                  },
+                  child: _PictureRatioItem(data: ratio, selected: selected),
+                ),
+              );
+            }),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildSubmit() {
+    return TapBox(
+      onTap: controller.create,
+      child: Container(
+        width: 250.w,
+        height: 44.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24.r),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_pictureAccentLight, _pictureAccent],
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LocaleKeys.create.tr.tv(
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            5.horizontalSpace,
+            Assets.imagesIcGem.iv(width: 20.w, height: 20.w),
+            2.horizontalSpace,
+            Obx(() {
+              final count = controller.count.value;
+              final price = count == 1
+                  ? 20
+                  : count == 2
+                  ? 30
+                  : count == 3
+                  ? 50
+                  : count == 4
+                  ? 70
+                  : 0;
+              controller.price = price;
+              return price.tv(
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PictureTopGlow extends StatelessWidget {
+  const _PictureTopGlow();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: SizedBox(
+        height: 300.h,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Opacity(
+              opacity: 0.40,
+              child: Assets.imagesBgCommon.iv(
+                width: Get.width,
+                height: 210.h,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 120.h,
+              bottom: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black.withValues(alpha: 0), Colors.black],
+                    stops: const [0.05, 0.60],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PictureThemeSection extends StatefulWidget {
+  const _PictureThemeSection({required this.controller});
+
+  final PictureController controller;
+
+  @override
+  State<_PictureThemeSection> createState() => _PictureThemeSectionState();
+}
+
+class _PictureThemeSectionState extends State<_PictureThemeSection> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final styles = widget.controller.styleList;
+      final real = <CreateStyleBean>[];
+      final fantasy = <CreateStyleBean>[];
+      for (final style in styles) {
+        if (style.styleType == 0) {
+          real.add(style);
+        } else {
+          fantasy.add(style);
+        }
+      }
+      final currentStyles = _index == 0 ? real : fantasy;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LocaleKeys.create.tv(
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
+          Row(
+            children: [
+              TapBox(
+                onTap: () => setState(() => _index = 0),
+                child: _PictureTabLabel(
+                  title: LocaleKeys.real.tr,
+                  selected: _index == 0,
+                ),
+              ),
+              40.horizontalSpace,
+              TapBox(
+                onTap: () => setState(() => _index = 1),
+                child: _PictureTabLabel(
+                  title: LocaleKeys.fantasy.tr,
+                  selected: _index == 1,
+                ),
+              ),
+            ],
+          ),
+          12.verticalSpace,
+          SizedBox(
+            height: 79.h,
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              scrollDirection: Axis.horizontal,
+              itemCount: currentStyles.length,
+              separatorBuilder: (context, index) => 12.horizontalSpace,
+              itemBuilder: (context, index) {
+                final style = currentStyles[index];
+                final selected = identical(
+                  widget.controller.selectedStyle,
+                  style,
+                );
+                return TapBox(
+                  onTap: () {
+                    widget.controller.selectStyle(style);
+                  },
+                  child: _PictureStyleItem(style: style, selected: selected),
+                );
+              },
             ),
           ),
-          16.horizontalSpace,
-          Assets.imagesIcGem.iv(width: 20.w),
-          3.horizontalSpace,
-          Obx(() {
-            final count = controller.count.value;
-            final price = count == 1
-                ? 20
-                : count == 2
-                ? 30
-                : count == 3
-                ? 50
-                : count == 4
-                ? 70
-                : 0;
-            controller.price = price;
-            return price.tv(
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
+        ],
+      );
+    });
+  }
+}
+
+class _PictureTabLabel extends StatelessWidget {
+  const _PictureTabLabel({required this.title, required this.selected});
+
+  final String title;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (selected)
+          Positioned(
+            left: 0,
+            bottom: 1.h,
+            child: Container(
+              width: 12.w,
+              height: 12.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.r),
+                gradient: LinearGradient(
+                  colors: [_pictureAccent, _pictureAccent.withValues(alpha: 0)],
+                ),
               ),
-            );
-          }),
+            ),
+          ),
+        title.tv(
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: selected ? 1 : 0.70),
+            fontSize: selected ? 16.sp : 14.sp,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PictureStyleItem extends StatelessWidget {
+  const _PictureStyleItem({required this.style, required this.selected});
+
+  final CreateStyleBean style;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 64.w,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 60.w,
+            height: 60.w,
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.r),
+                  child: style.cover.iv(
+                    width: 60.w,
+                    height: 60.w,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (selected)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _pictureAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: _pictureAccent, width: 1.w),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          4.verticalSpace,
+          style.name.tv(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected
+                  ? _pictureAccent
+                  : Colors.white.withValues(alpha: 0.70),
+              fontSize: 11.sp,
+              fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+              height: 1,
+            ),
+          ),
         ],
       ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(22.r)),
-        gradient: LinearGradient(
-          colors: [Color(0xffFBF05D), Color(0xffFDF996)],
+    );
+  }
+}
+
+enum _PictureStepIcon { minus, plus }
+
+class _PictureStepButton extends StatelessWidget {
+  const _PictureStepButton({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final _PictureStepIcon icon;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: enabled ? 1 : 0.30,
+      child: TapBox(
+        onTap: enabled ? onTap : null,
+        child: SizedBox(
+          width: 24.w,
+          height: 24.h,
+          child: Center(
+            child: CustomPaint(
+              size: Size(9.w, 9.w),
+              painter: _PictureStepPainter(icon),
+            ),
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _PictureStepPainter extends CustomPainter {
+  const _PictureStepPainter(this.icon);
+
+  final _PictureStepIcon icon;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+    final centerY = size.height / 2;
+    canvas.drawLine(Offset(0, centerY), Offset(size.width, centerY), paint);
+    if (icon == _PictureStepIcon.plus) {
+      final centerX = size.width / 2;
+      canvas.drawLine(Offset(centerX, 0), Offset(centerX, size.height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PictureStepPainter oldDelegate) {
+    return oldDelegate.icon != icon;
+  }
+}
+
+class _PictureRatioData {
+  const _PictureRatioData({
+    required this.value,
+    required this.title,
+    required this.iconWidth,
+    required this.iconHeight,
+  });
+
+  final String value;
+  final String title;
+  final double iconWidth;
+  final double iconHeight;
+}
+
+class _PictureRatioItem extends StatelessWidget {
+  const _PictureRatioItem({required this.data, required this.selected});
+
+  final _PictureRatioData data;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 82.w,
+      child: Column(
+        children: [
+          Container(
+            height: 32.h,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: selected
+                  ? _pictureAccent.withValues(alpha: 0.12)
+                  : _picturePanel,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: selected ? _pictureAccent : Colors.transparent,
+                width: 1.w,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 16.w,
+                  height: 16.w,
+                  child: Center(
+                    child: Container(
+                      width: data.iconWidth,
+                      height: data.iconHeight,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color(0xFFE6E6E6),
+                          width: 1.w,
+                        ),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  ),
+                ),
+                8.horizontalSpace,
+                data.value
+                    .replaceAll(':', ' : ')
+                    .tv(
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+              ],
+            ),
+          ),
+          4.verticalSpace,
+          data.title.tr.tv(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected
+                  ? _pictureAccent
+                  : Colors.white.withValues(alpha: 0.70),
+              fontSize: 11.sp,
+              fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+            ),
+          ),
+        ],
       ),
     );
   }
