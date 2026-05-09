@@ -443,115 +443,205 @@ Future<void> showHelpUs() {
   if ((Get.isDialogOpen ?? false) || (Get.isBottomSheetOpen ?? false)) {
     return Future.value();
   }
-  final contents = [
-    (
-      Assets.imagesPhStarLike,
-      Assets.imagesPhStarLike2,
-      LocaleKeys.notSatisfied,
-    ),
-    (Assets.imagesPhStarLike, Assets.imagesPhStarLike2, LocaleKeys.could),
-    (Assets.imagesPhStarLike, Assets.imagesPhStarLike2, LocaleKeys.lovingIt),
+  final labels = [
+    LocaleKeys.helpUsNotSatisfied,
+    LocaleKeys.helpUsCouldBeBetter,
+    LocaleKeys.helpUsLovingIt,
   ];
-  (String, String, String)? selectedItem;
+  var selectedIndex = -1;
 
-  return Get.bottomSheet(
-    isScrollControlled: false,
-    SizedBox(
-      height: Get.height / 2.5,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          buildTheme1SheetRootWidget(
-            child: StatefulBuilder(
-              builder: (context, setState) => ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(20.r)),
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(Assets.imagesBgkHelpUs),
-                      fit: BoxFit.cover,
-                    ),
+  return Get.dialog<void>(
+    Material(
+      color: Colors.transparent,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          return SizedBox(
+            width: Get.width,
+            height: Get.height,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.black.withValues(alpha: 0.76),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      24.verticalSpace,
-                      Text(
-                        LocaleKeys.helpUs.tr,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
+                ),
+                Positioned(
+                  left: 16.w,
+                  top: 161.h,
+                  child: SizedBox(
+                    width: 343.w,
+                    height: 291.h,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Assets.imagesBgHelpUs.iv(
+                            width: 343.w,
+                            height: 291.h,
+                            fit: BoxFit.fill,
+                          ),
                         ),
-                      ),
-                      28.verticalSpace,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: contents.map((v) {
-                          final current = contents.indexOf(v);
-                          int selectedIndex = -1;
-                          if (selectedItem != null) {
-                            selectedIndex = contents.indexOf(selectedItem!);
-                          }
-                          return TapBox(
-                            onTap: () {
-                              setState(() {
-                                selectedItem = v;
-                              });
-                            },
-                            child: (selectedIndex >= current ? v.$2 : v.$1)
-                                .iv(width: 64.w)
-                                .marginSymmetric(horizontal: 2.w),
-                          );
-                        }).toList(),
-                      ),
-                      24.verticalSpace,
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          (selectedItem?.$3.tr).tv(
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 122.h,
+                          child: Text(
+                            LocaleKeys.helpUsTitle.tr,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.black.withValues(alpha: 0.75),
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                          8.verticalSpace,
-                          buildTheme3Btn(
-                            bold: true,
-                            title:
-                                (selectedItem != null &&
-                                    contents.indexOf(selectedItem!) != 2)
-                                ? LocaleKeys.submitFb
-                                : LocaleKeys.submit,
-                            isValid: selectedItem != null,
-                            alignment: Alignment.center,
-                            onTap: () {
-                              if (selectedItem == null) return;
-                              if (contents.indexOf(selectedItem!) != 2) {
-                                toEmail();
-                              } else {
-                                openStoreReview();
-                              }
-                            },
+                        ),
+                        Positioned(
+                          left: 20.w,
+                          top: 165.h,
+                          child: Row(
+                            children: List.generate(labels.length, (index) {
+                              final isSelected =
+                                  selectedIndex >= 0 && selectedIndex >= index;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index == labels.length - 1 ? 0 : 24.w,
+                                ),
+                                child: TapBox(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedIndex = index;
+                                    });
+                                  },
+                                  child: SizedBox(
+                                    width: 84.w,
+                                    height: 84.w,
+                                    child: Center(
+                                      child: _buildHelpUsStarIcon(isSelected),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
                           ),
-                        ],
-                      ),
-                      20.verticalSpace,
-                    ],
-                  ).paddingSymmetric(horizontal: 20.w),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 253.h,
+                          child: SizedBox(
+                            height: 15.h,
+                            child: selectedIndex >= 0
+                                ? Text(
+                                    labels[selectedIndex].tr,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  left: (Get.width - 250.w) / 2,
+                  top: 472.h,
+                  child: TapBox(
+                    onTap: selectedIndex < 0
+                        ? null
+                        : () {
+                            if (selectedIndex != 2) {
+                              toEmail();
+                            } else {
+                              openStoreReview();
+                            }
+                          },
+                    child: Container(
+                      width: 250.w,
+                      height: 44.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selectedIndex < 0
+                            ? const Color(0xFF4D2D4A)
+                            : null,
+                        borderRadius: BorderRadius.circular(24.r),
+                        gradient: selectedIndex < 0
+                            ? null
+                            : const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+                              ),
+                      ),
+                      child: Text(
+                        LocaleKeys.submit.tr,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selectedIndex < 0
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: (Get.width - 24.w) / 2,
+                  top: 536.h,
+                  child: TapBox(
+                    onTap: Get.closeDialog,
+                    child: buildCloseIcon(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Positioned(
-            right: 32.w,
-            top: 18.h,
-            child: Assets.imagesPhHelpUs.iv(width: 90.w),
-          ),
-        ],
+          );
+        },
       ),
+    ),
+    barrierColor: Colors.transparent,
+    useSafeArea: false,
+  );
+}
+
+Widget _buildHelpUsStarIcon(bool isSelected) {
+  final star = Assets.imagesIcHelpUsStarOn.iv(
+    width: 64.w,
+    height: 64.w,
+    fit: BoxFit.contain,
+  );
+  if (isSelected) return star;
+  return Opacity(
+    opacity: 0.56,
+    child: ColorFiltered(
+      colorFilter: const ColorFilter.matrix([
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      child: star,
     ),
   );
 }

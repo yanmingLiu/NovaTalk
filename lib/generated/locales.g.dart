@@ -143,6 +143,10 @@ class LocaleKeys {
   static const clothes = 'clothes';
   static const long = 'long';
   static const helpUs = 'helpUs';
+  static const helpUsTitle = 'helpUsTitle';
+  static const helpUsNotSatisfied = 'helpUsNotSatisfied';
+  static const helpUsCouldBeBetter = 'helpUsCouldBeBetter';
+  static const helpUsLovingIt = 'helpUsLovingIt';
   static const discount = 'discount';
   static const gemTips3 = 'gemTips3';
   static const designMask = 'designMask';
@@ -421,6 +425,10 @@ class Locales {
         'Go beyond the surface and discover what’s really behind any look',
     'long': 'Detailed',
     'helpUs': 'Enjoying the app?',
+    'helpUsTitle': 'Do You Like Us?',
+    'helpUsNotSatisfied': 'Not satisfied, needs improvement.',
+    'helpUsCouldBeBetter': 'It\'s okay, could be better.',
+    'helpUsLovingIt': 'Great! I\'m loving it.',
     'discount': '@n% off',
     'gemTips3': 'Buy gems to chat.',
     'designMask': 'Customize mask',

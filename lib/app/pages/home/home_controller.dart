@@ -174,8 +174,9 @@ class RolesController extends GetxController {
   }
 
   void onItemTap(RoleRecords role, DiscoverListType type) {
-    showLoginReward();
-    return;
+    // showLoginReward();
+    // showHelpUs();
+    // return;
     FocusManager.instance.primaryFocus?.unfocus();
     if (role.id.val.isEmpty) {
       return;
