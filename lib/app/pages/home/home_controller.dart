@@ -174,8 +174,8 @@ class RolesController extends GetxController {
   }
 
   void onItemTap(RoleRecords role, DiscoverListType type) {
-    // showLoginReward();
-    // return;
+    showLoginReward();
+    return;
     FocusManager.instance.primaryFocus?.unfocus();
     if (role.id.val.isEmpty) {
       return;
@@ -233,101 +233,12 @@ class RolesController extends GetxController {
   }
 
   void showLoginReward() {
-    bool isVip = AppUser.inst.isVip.value;
-    final body = Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.topCenter,
-      children: [
-        Assets.imagesPhGem2.iv(),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            70.verticalSpace,
-            LocaleKeys.dailyBonus.tv(
-              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold),
-            ),
-            10.horizontalSpace,
-            (isVip ? "+50" : "+20").tv(
-              style: TextStyle(
-                fontSize: 24.sp,
-                color: cTheme.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              constraints: BoxConstraints(minHeight: 220.h),
-              child: isVip
-                  ? sh
-                  : Text.rich(
-                      textAlign: TextAlign.center,
-                      TextSpan(
-                        children: buildTextSpans(
-                          origin: LocaleKeys.pro50.tr,
-                          targets: ["50", "@i"],
-                          style: tTheme.labelLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16.sp,
-                          ),
-                          buildTargetTextSpan:
-                              (String target, TextStyle? style, int index) {
-                                if (index == 0) {
-                                  return TextSpan(
-                                    text: "+$target",
-                                    style: style?.copyWith(
-                                      color: cTheme.scrim,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 20.sp,
-                                    ),
-                                  );
-                                }
-                                return WidgetSpan(
-                                  child: Assets.imagesIcGem
-                                      .iv(height: 22.w)
-                                      .marginOnly(bottom: 4.h),
-                                  alignment: PlaceholderAlignment.middle,
-                                );
-                              },
-                        ),
-                      ),
-                    ).marginOnly(bottom: 20.h),
-            ),
-            buildTheme3Btn(
-              alignment: Alignment.center,
-              margin: EdgeInsets.symmetric(horizontal: 68.w),
-              title: isVip ? LocaleKeys.claimNow.tr : LocaleKeys.goPro.tr,
-              onTap: () {
-                if (isVip) {
-                  onTopCollect();
-                  Get.closeDialog();
-                } else {
-                  logEvent("dailyreward_pop_pro_click");
-                  pushVip(VipFrom.ldailyrd);
-                }
-              },
-            ),
-            if (!isVip)
-              buildTheme3Btn(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(left: 68.w, right: 68.w, top: 12.h),
-                title: LocaleKeys.claimNow.tr,
-                titleWidget: LocaleKeys.claimNow.tv(style: tTheme.titleMedium!),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  color: Colors.white.withValues(alpha: 0.16),
-                  border: Border.all(color: Colors.white, width: 1.w),
-                ),
-                onTap: () {
-                  onTopCollect();
-                  Get.closeDialog();
-                },
-              ),
-          ],
-        ),
-      ],
+    final isVip = AppUser.inst.isVip.value;
+    Get.dialog(
+      _buildLoginRewardDialog(isVip),
+      barrierColor: Colors.transparent,
+      useSafeArea: false,
     );
-    Get.dialog(body.marginOnly(top: 100.h));
     // if (isVip) {
     //   Theme1Dialog.showBottomOnlyBtn(
     //     body,
@@ -359,6 +270,195 @@ class RolesController extends GetxController {
     //     contentWidget: body,
     //   );
     // }
+  }
+
+  Widget _buildLoginRewardDialog(bool isVip) {
+    return Material(
+      color: Colors.transparent,
+      child: SizedBox(
+        width: Get.width,
+        height: Get.height,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.78)),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 200.h,
+              child: Text(
+                LocaleKeys.dailyReward.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Positioned(
+              left: (Get.width - 145.w) / 2,
+              top: 244.h,
+              child: Image.asset(
+                Assets.imagesPhPhoneGuideVipDiamond,
+                width: 145.w,
+                height: 145.w,
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              right: 62.w,
+              top: 244.h,
+              child: _buildRewardAmountBadge(isVip ? '+50' : '+20'),
+            ),
+            if (!isVip)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 407.h,
+                child: Center(child: _buildProRewardLine()),
+              ),
+            Positioned(
+              left: (Get.width - 250.w) / 2,
+              top: isVip ? 413.h : 433.h,
+              child: _buildLoginRewardButton(
+                title: isVip ? LocaleKeys.collect.tr : LocaleKeys.goToPro.tr,
+                onTap: () {
+                  if (isVip) {
+                    onTopCollect();
+                    Get.closeDialog();
+                  } else {
+                    logEvent("dailyreward_pop_pro_click");
+                    pushVip(VipFrom.ldailyrd);
+                  }
+                },
+              ),
+            ),
+            if (!isVip)
+              Positioned(
+                left: (Get.width - 250.w) / 2,
+                top: 485.h,
+                child: _buildLoginRewardButton(
+                  title: LocaleKeys.collect.tr,
+                  isOutline: true,
+                  onTap: () {
+                    onTopCollect();
+                    Get.closeDialog();
+                  },
+                ),
+              ),
+            Positioned(
+              left: (Get.width - 24.w) / 2,
+              top: isVip ? 481.h : 553.h,
+              child: TapBox(
+                onTap: Get.closeDialog,
+                child: buildCloseIcon(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRewardAmountBadge(String amount) {
+    return Container(
+      height: 28.h,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(15.r),
+          topRight: Radius.circular(15.r),
+          bottomRight: Radius.circular(15.r),
+          bottomLeft: Radius.circular(1.r),
+        ),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+        ),
+      ),
+      child: amount.tv(
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProRewardLine() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        LocaleKeys.pro.tr.tv(
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        4.horizontalSpace,
+        '50'.tv(
+          style: TextStyle(
+            color: const Color(0xFFC7ABFF),
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        2.horizontalSpace,
+        Assets.imagesIcGem.iv(width: 20.w, height: 20.w, fit: BoxFit.contain),
+        LocaleKeys.perDay.tr.tv(
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginRewardButton({
+    required String title,
+    required VoidCallback onTap,
+    bool isOutline = false,
+  }) {
+    return TapBox(
+      onTap: onTap,
+      child: Container(
+        width: 250.w,
+        height: 44.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isOutline ? Colors.transparent : null,
+          borderRadius: BorderRadius.circular(24.r),
+          border: isOutline
+              ? Border.all(
+                  color: Colors.white.withValues(alpha: 0.50),
+                  width: 1.w,
+                )
+              : null,
+          gradient: isOutline
+              ? null
+              : const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+                ),
+        ),
+        child: title.tv(
+          style: TextStyle(
+            color: isOutline ? Colors.white : Colors.black,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
   }
 }
 

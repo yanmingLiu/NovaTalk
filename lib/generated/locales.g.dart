@@ -148,6 +148,11 @@ class LocaleKeys {
   static const designMask = 'designMask';
   static const tryNow = 'tryNow';
   static const dailyBonus = 'dailyBonus';
+  static const dailyReward = 'dailyReward';
+  static const collect = 'collect';
+  static const goToPro = 'goToPro';
+  static const pro = 'pro';
+  static const perDay = 'perDay';
   static const iToVideo = 'iToVideo';
   static const vipDes4 = 'vipDes4';
   static const profileOverview = 'profileOverview';
@@ -421,6 +426,11 @@ class Locales {
     'designMask': 'Customize mask',
     'tryNow': 'Try',
     'dailyBonus': 'Daily bonus',
+    'dailyReward': 'Daily reward',
+    'collect': 'Collect',
+    'goToPro': 'Go to Pro',
+    'pro': 'Pro',
+    'perDay': '/day',
     'iToVideo': 'Image to video',
     'vipDes4': '@n tickets',
     'profileOverview': 'Profile',
