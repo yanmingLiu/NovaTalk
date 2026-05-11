@@ -336,7 +336,7 @@ class VipView extends GetBuildView<VipController> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Assets.imagesIcVipDesignGem.iv(
+                  Assets.imagesIcGem.iv(
                     width: 24.w,
                     height: 24.w,
                     fit: BoxFit.contain,

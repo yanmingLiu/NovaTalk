@@ -190,48 +190,67 @@ Future showTheme1Sheet({
     isScrollControlled: true,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
-    buildTheme1SheetRootWidget(
-      child: SizedBox(
-        width: Get.width,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (title != null)
-              title
-                  .tv(style: tTheme.titleLarge!.copyWith(color: Colors.white))
-                  .marginSymmetric(vertical: 20.h),
-            child,
-            SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (onConfirm != null)
-                    buildTheme3Btn(
-                      alignment: Alignment.center,
-                      title: confirmText,
-                      onTap: onConfirm,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(22.r)),
-                        border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ).marginSymmetric(vertical: 15.h),
-                  if (showCancel)
-                    buildTheme3Btn(
-                      alignment: Alignment.center,
-                      title: LocaleKeys.cancelAct.tr,
-                      onTap: () {
-                        Get.closeBottomSheet();
-                      },
-                    ).marginOnly(bottom: 25.h),
-                ],
-              ).marginSymmetric(horizontal: 16.w),
-            ),
-          ],
+    Column(
+      spacing: 20,
+      crossAxisAlignment: .start,
+      children: [
+        Spacer(),
+        TapBox(
+          onTap: () => Get.back(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Assets.imagesIcCloseOri.iv(width: 24),
+          ),
         ),
-      ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadiusGeometry.vertical(
+              top: Radius.circular(16),
+            ),
+            gradient: LinearGradient(
+              colors: [Color(0xFFFFDFFD), Color(0xFFFFFFFF)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SizedBox(
+            width: Get.width,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (title != null)
+                  title
+                      .tv(
+                        style: tTheme.titleLarge!.copyWith(color: Colors.white),
+                      )
+                      .marginSymmetric(vertical: 20.h),
+                child,
+                SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onConfirm != null)
+                        buildTheme3Btn(
+                          alignment: Alignment.center,
+                          title: confirmText,
+                          onTap: onConfirm,
+                        ).marginSymmetric(vertical: 15.h),
+                      if (showCancel)
+                        buildTheme3Btn(
+                          alignment: Alignment.center,
+                          title: LocaleKeys.cancelAct.tr,
+                          onTap: () {
+                            Get.closeBottomSheet();
+                          },
+                        ).marginOnly(bottom: 25.h),
+                    ],
+                  ).marginSymmetric(horizontal: 16.w),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -242,38 +261,36 @@ Future sheetActions(Map<String, Function> actions) async {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: actions.entries.map((entry) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Get.closeDialog();
-                      entry.value.call();
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                      padding: const EdgeInsets.all(17.0),
-                      child: Center(
-                        child: Text(
-                          entry.key,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal,
-                          ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: actions.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.closeDialog();
+                    entry.value.call();
+                  },
+                  child: Container(
+                    color: Colors.transparent,
+                    padding: const EdgeInsets.all(17.0),
+                    child: Center(
+                      child: Text(
+                        entry.key,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
                   ),
-                  Divider(height: 1, color: Colors.white.withOpacity(0.1)),
-                ],
-              );
-            }).toList(),
-          ),
+                ),
+                Divider(height: 1, color: Colors.white.withOpacity(0.1)),
+              ],
+            );
+          }).toList(),
         ).marginSymmetric(horizontal: 40.w),
         const SizedBox(height: 30),
         TapBox(
@@ -291,17 +308,35 @@ class Theme1Dialog {
   Theme1Dialog._();
 
   static Future showGroup({Widget? child, double? minHeight}) {
-    return Get.dialog(
-      Center(
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 20.w),
-          constraints: BoxConstraints(minHeight: minHeight ?? 120.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            color: Colors.white,
+    return Get.bottomSheet(
+      barrierColor: Colors.black.withValues(alpha: 0.8),
+      Column(
+        spacing: 20,
+        crossAxisAlignment: .start,
+        children: [
+          Spacer(),
+          TapBox(
+            onTap: () => Get.back(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Assets.imagesIcCloseOri.iv(width: 24),
+            ),
           ),
-          child: child,
-        ),
+          Container(
+            constraints: BoxConstraints(minHeight: minHeight ?? 120.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadiusGeometry.vertical(
+                top: Radius.circular(16),
+              ),
+              gradient: LinearGradient(
+                colors: [Color(0xFFFFDFFD), Color(0xFFFFFFFF)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: child,
+          ),
+        ],
       ),
     );
   }
@@ -348,21 +383,24 @@ class Theme1Dialog {
         mainAxisSize: MainAxisSize.min,
         children: [
           20.verticalSpace,
-          (titleWidget ??
-                  (title ?? LocaleKeys.prompt.tr).tv(
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ))
-              .marginOnly(bottom: 24.h),
+          Center(
+            child:
+                (titleWidget ??
+                        (title ?? LocaleKeys.prompt.tr).tv(
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ))
+                    .marginOnly(bottom: 24.h),
+          ),
           (contentWidget ??
               (content != null
                   ? content.tv(
                       style: TextStyle(
                         fontSize: 14.sp,
-                        color: Colors.black.withValues(alpha: 0.9),
+                        color: Colors.black,
                         fontWeight: FontWeight.w400,
                       ),
                       textAlign: TextAlign.center,
@@ -380,7 +418,7 @@ class Theme1Dialog {
           ),
           20.verticalSpace,
         ],
-      ).paddingSymmetric(horizontal: 20.w),
+      ).paddingSymmetric(horizontal: 16.w),
     );
   }
 }
@@ -439,8 +477,12 @@ Widget buildTheme3Btn({
         decoration:
             decoration ??
             BoxDecoration(
-              color: cTheme.scrim,
               borderRadius: BorderRadius.circular(22.r),
+              gradient: LinearGradient(
+                colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
         child:
             titleWidget ??
@@ -545,7 +587,7 @@ Widget buildHomeTabBar({
       labelStyle:
           labelStyle ?? tTheme.titleMedium?.copyWith(color: Colors.black),
       onTap: onTap,
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
       tabs: tabs,
     ),
   );
@@ -592,7 +634,7 @@ Widget buildHomeTitleTabBar({
           ),
           dividerHeight: 0,
           onTap: onTap,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
           tabs: tabs,
         );
       },
@@ -602,26 +644,7 @@ Widget buildHomeTitleTabBar({
 
 Widget buildBackIcon({Color? color}) {
   return Center(
-    child: Container(
-      width: 24.w,
-      height: 24.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFF131711).withValues(alpha: 0.30),
-        borderRadius: BorderRadius.circular(13.r),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.70),
-          width: 0.8,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withValues(alpha: 0.25),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Icon(Icons.arrow_back_ios_rounded,color: color,size: 16.w,),
-    ),
+    child: Assets.imagesIcBack.iv(width: 24.w, height: 24.w, color: color),
   );
 }
 
@@ -639,13 +662,10 @@ Widget buildCloseIcon({Color? color}) {
           width: 0.6,
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.white.withValues(alpha: 0.20),
-            blurRadius: 4,
-          ),
+          BoxShadow(color: Colors.white.withValues(alpha: 0.20), blurRadius: 4),
         ],
       ),
-      child: Icon(Icons.close,color: color,size: 16.w,),
+      child: Icon(Icons.close, color: color, size: 16.w),
     ),
   );
 }

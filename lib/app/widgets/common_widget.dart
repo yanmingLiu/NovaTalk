@@ -188,9 +188,7 @@ extension GetWindow on GetInterface {
   }
 
   void closeDialog() {
-    if (isDialogOpen == true) {
-      Get.back();
-    }
+    Get.back();
   }
 }
 
@@ -416,23 +414,24 @@ Widget buildTheme2BottomBtn({
   String? doneTitle,
 }) {
   return SafeArea(
-    child: Row(
+    child: Column(
+      mainAxisSize: .min,
       children: [
         buildTheme3Btn(
+          width: 250.w,
+          alignment: Alignment.center,
+          title: doneTitle ?? LocaleKeys.done.tr,
+          onTap: done,
+        ),
+        8.verticalSpace,
+        buildTheme3Btn(
+          width: 250.w,
           title: LocaleKeys.cancel.tr,
+          alignment: Alignment.center,
           onTap: cancel ?? Get.closeBottomSheet,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(color: Color(0xff1C1A1D), width: 1),
-          ),
-        ),
-        11.horizontalSpace,
-        Expanded(
-          flex: 2,
-          child: buildTheme3Btn(
-            alignment: Alignment.center,
-            title: doneTitle ?? LocaleKeys.done.tr,
-            onTap: done,
+            color: Color(0xFFF7F7F7),
           ),
         ),
       ],

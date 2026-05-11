@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-
 import 'package:get/get.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
@@ -286,7 +285,7 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
             child: buildBackIcon(color: Colors.white),
           ),
           const Spacer(),
-          if (isCloB) _buildMoreMenu(),
+          _buildMoreMenu(),
         ],
       ),
     );
@@ -298,75 +297,82 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
       onTap?.call();
     }
 
+    Widget buildItem({
+      required String icon,
+      required String text,
+      required VoidCallback onTap,
+      Color? color,
+    }) {
+      return TapBox(
+        onTap: onTap,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon.iv(width: 24, color: color ?? Colors.white),
+            4.horizontalSpace,
+            text.tv(
+              style: TextStyle(
+                color: color ?? Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return CustomPopup(
       showArrow: false,
       rootNavigator: true,
+      backgroundColor: Colors.transparent,
       contentPadding: EdgeInsets.zero,
       content: Container(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
+        width: 176.w,
+        margin: EdgeInsets.only(right: 24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF262626),
           borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 25.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TapBox(
-                    onTap: () => tapMenu(_clearHistory),
-                    padding: EdgeInsets.all(5.r),
-                    child: LocaleKeys.cleHistory.tv(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                  TapBox(
-                    onTap: () => tapMenu(report),
-                    padding: EdgeInsets.all(5.r),
-                    child: LocaleKeys.report.tv(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            buildItem(
+              icon: Assets.imagesIcClose,
+              text: LocaleKeys.cleHistory,
+              onTap: () => tapMenu(_clearHistory),
             ),
-            SizedBox(
-              width: 150.w,
-              child: Divider(
-                height: 10.h,
-                thickness: 4.h,
-                color: const Color(0xffFAFAFA),
-              ),
+            Divider(
+              height: 1.h,
+              thickness: 0.5.h,
+              color: Colors.white.withValues(alpha: 0.1),
+              indent: 16.w,
+              endIndent: 16.w,
             ),
-            TapBox(
+            buildItem(
+              icon: Assets.imagesIcReport,
+              text: LocaleKeys.report,
+              onTap: () => tapMenu(report),
+            ),
+            Divider(
+              height: 1.h,
+              thickness: 0.5.h,
+              color: Colors.white.withValues(alpha: 0.1),
+              indent: 16.w,
+              endIndent: 16.w,
+            ),
+            buildItem(
+              icon: Assets.imagesIcDelete,
+              text: LocaleKeys.remChat,
               onTap: () => tapMenu(_deleteChat),
-              padding: EdgeInsets.all(5.r),
-              child: LocaleKeys.remChat.tv(
-                style: TextStyle(
-                  color: const Color(0xffE2266C),
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              color: const Color(0xFFFF4747),
             ),
-            4.verticalSpace,
           ],
         ),
       ),
-      child: _CircleIconButton(
-        child: Assets.imagesPhMore.iv(width: 3.w, height: 13.h),
-      ),
+      child: Assets.imagesIcMore.iv(width: 24.w, height: 24.w),
     );
   }
 
@@ -401,8 +407,8 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
 
   Widget _buildStatsCard() {
     return Container(
-      width: 303.w,
       height: 58.h,
+      margin: EdgeInsets.symmetric(horizontal: 36.w),
       padding: EdgeInsets.symmetric(horizontal: 52.w),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
@@ -430,14 +436,12 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
       children: [
         TapBox(
           onTap: () async {
-            SmartDialog.showLoading();
             await _follow();
-            SmartDialog.dismiss();
           },
           child: _PillButton(
             text: liked ? LocaleKeys.liked.tr : LocaleKeys.like.tr,
-            selected: liked,
-            filledSelected: isCloB,
+            selected: true,
+            filledSelected: !liked,
             loading: isLoading,
           ),
         ),
@@ -663,36 +667,6 @@ enum _ProfileTabType {
   }
 }
 
-class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24.w,
-      height: 24.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFF131711).withValues(alpha: 0.30),
-        borderRadius: BorderRadius.circular(13.r),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.70),
-          width: 0.6,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withValues(alpha: 0.25),
-            blurRadius: 4.r,
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
 class _AgeBadge extends StatelessWidget {
   const _AgeBadge({required this.text});
 
@@ -737,40 +711,37 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 57.w,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              height: 1.2,
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'Montserrat',
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.sp,
+            height: 1.2,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Montserrat',
           ),
-          2.verticalSpace,
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
-              fontSize: 14.sp,
-              height: 1.2,
-              fontWeight: FontWeight.w400,
-            ),
+        ),
+        2.verticalSpace,
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.4),
+            fontSize: 14.sp,
+            height: 1.2,
+            fontWeight: FontWeight.w400,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -791,17 +762,21 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(24.r);
-    final selectedFilled = selected && filledSelected;
-    final selectedOutlined = selected && !filledSelected;
+    final isFilled = selected && filledSelected;
+    final isOutlined = selected && !filledSelected;
+    final mainPinkColor = const Color(0xFFFF96F7);
+
     return Container(
       width: 92.w,
       height: 32.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected
-            ? Colors.transparent
-            : Colors.white.withValues(alpha: 0.15),
-        gradient: selectedFilled
+        color: isFilled
+            ? null
+            : (selected
+                  ? Colors.transparent
+                  : Colors.white.withValues(alpha: 0.15)),
+        gradient: isFilled
             ? const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -811,9 +786,10 @@ class _PillButton extends StatelessWidget {
             : null,
         borderRadius: borderRadius,
         border: Border.all(
-          color: selectedOutlined || (selected && loading)
-              ? const Color(0xFFFF96F7)
+          color: isFilled || isOutlined || (selected && loading)
+              ? mainPinkColor
               : Colors.transparent,
+          width: 1.w,
         ),
       ),
       child: loading
@@ -822,7 +798,7 @@ class _PillButton extends StatelessWidget {
               height: 14.w,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5.w,
-                color: selectedFilled ? Colors.black : Colors.white,
+                color: isFilled ? Colors.black : mainPinkColor,
               ),
             )
           : Text(
@@ -831,10 +807,10 @@ class _PillButton extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: selectedFilled
+                color: isFilled
                     ? Colors.black
-                    : selectedOutlined
-                    ? const Color(0xFFFF96F7)
+                    : isOutlined
+                    ? mainPinkColor
                     : Colors.white,
                 fontSize: 14.sp,
                 height: 1.2,
@@ -987,17 +963,12 @@ void report() {
     },
     child: Obx(() {
       choose.value;
-      return GridView.builder(
+      return ListView.separated(
         shrinkWrap: true,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
         itemCount: actions.length,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 8.w,
-          crossAxisSpacing: 8.w,
-          mainAxisExtent: 42.h,
-        ),
+        separatorBuilder: (context, index) => 8.verticalSpace,
         itemBuilder: (context, index) {
           final key = actions.keys.elementAt(index);
           return InkWell(
@@ -1007,27 +978,22 @@ void report() {
             child: Container(
               height: 42.h,
               padding: EdgeInsets.symmetric(horizontal: 16.w),
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Color(0xffF4F4F6),
-                borderRadius: BorderRadius.circular(21.w),
-                border: Border.all(
-                  color: choose.value == key
-                      ? Color(0xffE2266C)
-                      : Colors.transparent,
-                  width: 1.w,
-                ),
+                color: Color(0xFFF7F7F7),
+                borderRadius: BorderRadius.circular(12.w),
               ),
               child: Text(
                 key,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: choose.value == key
-                      ? Color(0xffE2266C)
-                      : Color(0xff434343),
+                      ? Color(0xFFFF96F7)
+                      : Color(0xFF000000),
                 ),
               ),
             ),
