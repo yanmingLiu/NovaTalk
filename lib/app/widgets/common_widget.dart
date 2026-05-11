@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
 
 import '../../generated/assets.dart';
@@ -84,6 +84,7 @@ extension Common on Comparable? {
             child: CircularProgressIndicator(strokeWidth: 2.w),
           ),
         ),
+        errorWidget: (context, url, error) => const Icon(Icons.image),
       );
     }
     return Image.asset(

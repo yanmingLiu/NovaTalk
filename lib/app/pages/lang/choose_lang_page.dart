@@ -48,7 +48,7 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
 
   late SliverObserverController observerController;
 
-  Map<int, BuildContext> sliverContextMap = {};
+  final Map<int, GlobalKey> sliverKeyMap = {};
 
   var choosedName = ''.obs;
   Lang? selectedLang; // 保存选中的语言对象
@@ -78,6 +78,7 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
   Future<void> generateContactData() async {
     try {
       loader.loading();
+      sliverKeyMap.clear();
       if (mounted) {
         setState(() {});
       }
@@ -129,6 +130,14 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
     observerController = SliverObserverController(controller: scrollController);
 
     _loadLanguageData();
+  }
+
+  @override
+  void dispose() {
+    cursorInfo.dispose();
+    scrollController.dispose();
+    loader.close();
+    super.dispose();
   }
 
   Future<void> _loadLanguageData() async {
@@ -200,7 +209,10 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
                       SliverViewObserver(
                         controller: observerController,
                         sliverContexts: () {
-                          return sliverContextMap.values.toList();
+                          return sliverKeyMap.values
+                              .map((key) => key.currentContext)
+                              .nonNulls
+                              .toList();
                         },
                         child: CustomScrollView(
                           key: ValueKey(isShowListMode),
@@ -332,7 +344,6 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
               ],
             ),
           ),
-
         ],
       ),
     );
@@ -408,9 +419,14 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
             title: symbols[index],
             offset: cursorOffset,
           );
-          final sliverContext = sliverContextMap[index];
+          final sliverContext = sliverKeyMap[index]?.currentContext;
           if (sliverContext == null) return;
-          observerController.jumpTo(index: 0, sliverContext: sliverContext);
+          observerController.jumpTo(
+            index: 0,
+            sliverContext: sliverContext,
+            isFixedHeight: true,
+            renderSliverType: ObserverRenderSliverType.list,
+          );
         },
         onSelectionEnd: () {
           cursorInfo.value = null;
@@ -422,11 +438,11 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
   Widget _buildSliver({required int index, required AzListContactModel model}) {
     final names = model.names;
     if (names.isEmpty) return const SliverToBoxAdapter();
-    Widget resultWidget = SliverList(
-      delegate: SliverChildBuilderDelegate((context, itemIndex) {
-        if (sliverContextMap[index] == null) {
-          sliverContextMap[index] = context;
-        }
+    final sliverKey = sliverKeyMap.putIfAbsent(index, GlobalKey.new);
+    Widget resultWidget = SliverFixedExtentList.builder(
+      key: sliverKey,
+      itemExtent: 40.h,
+      itemBuilder: (context, itemIndex) {
         return Obx(
           () => Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -444,7 +460,8 @@ class _ChooseLangPageState extends State<ChooseLangPage> {
             ),
           ),
         );
-      }, childCount: names.length),
+      },
+      itemCount: names.length,
     );
     resultWidget = SliverStickyHeader(
       header: Container(

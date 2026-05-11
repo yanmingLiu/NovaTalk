@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:novatalk/app/entities/price_config_bean.dart';
+import 'dart:typed_data';
+
+import 'package:adjust_sdk/adjust.dart';
 import 'package:dio/dio.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:get/get.dart' hide Response, FormData;
@@ -9,6 +12,7 @@ import 'package:novatalk/app/entities/conversation_entity.dart';
 import 'package:novatalk/app/entities/msg_answer.dart';
 import 'package:novatalk/app/entities/msg_toys.dart';
 import 'package:novatalk/app/entities/people_mask_entity.dart';
+import 'package:novatalk/app/entities/price_config_bean.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
 import 'package:novatalk/app/entities/role_tags_entity.dart';
 import 'package:novatalk/app/entities/sku.dart';
@@ -37,13 +41,7 @@ import '../entities/und_history_bean.dart';
 import '../entities/und_result_bean.dart';
 import '../entities/und_style_bean.dart';
 import 'clo_util.dart';
-import 'package:adjust_sdk/adjust.dart';
-
 import 'common_utils.dart';
-
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'crypto_interceptor.dart';
 import 'cryptography.dart';
 
@@ -179,6 +177,7 @@ class ApiSvc {
       }
       if (forYou != null) {
         data['forYou'] = forYou;
+        data['tags'] = [];
       }
       var res = await DioHelper.dio.post(
         AppDeploy.roleList,
@@ -778,7 +777,7 @@ class ApiSvc {
     }
   }
 
-  static buildParms({
+  static Map<String, Object?> buildParms({
     required String charId,
     required int conversationId,
     required String uid,
@@ -1264,6 +1263,6 @@ class ApiSvc {
     }
     return result.success == true &&
         result.data?.imgs != null &&
-        result.data!.imgs!.length > 0;
+        result.data!.imgs!.isNotEmpty;
   }
 }
