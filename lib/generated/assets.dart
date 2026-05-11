@@ -13,6 +13,10 @@ class Assets {
       'library/images/bg_me_vip_diamond.png';
   static const String imagesBgPhoneGuideVipCard =
       'library/images/bg_phone_guide_vip_card.svg';
+  static const String imagesBgShowQa1 = 'library/images/bg_show_qa1.webp';
+  static const String imagesBgShowQa2 = 'library/images/bg_show_qa2.webp';
+  static const String imagesBgVipDesign1 = 'library/images/bg_vip_design1.jpg';
+  static const String imagesBgVipDesign2 = 'library/images/bg_vip_design2.jpg';
   static const String imagesBgkClotTips = 'library/images/bgk_clot_tips.webp';
   static const String imagesBgkHelpUs = 'library/images/bgk_help_us.webp';
   static const String imagesBgkSetVip = 'library/images/bgk_set_vip.webp';
@@ -27,6 +31,7 @@ class Assets {
   static const String imagesIcEmpty = 'library/images/ic_empty.webp';
   static const String imagesIcFilter = 'library/images/ic_filter.webp';
   static const String imagesIcGem = 'library/images/ic_gem.webp';
+  static const String imagesIcGemDesign = 'library/images/ic_gem_design.png';
   static const String imagesIcHelpUsStarOn =
       'library/images/ic_help_us_star_on.png';
   static const String imagesIcLangCheck = 'library/images/ic_lang_check.svg';
@@ -52,6 +57,10 @@ class Assets {
       'library/images/ic_picture_clear.webp';
   static const String imagesIcSearch = 'library/images/ic_search.webp';
   static const String imagesIcVip = 'library/images/ic_vip.webp';
+  static const String imagesIcVipDesignCheck =
+      'library/images/ic_vip_design_check.svg';
+  static const String imagesIcVipDesignGem =
+      'library/images/ic_vip_design_gem.png';
   static const String imagesPhAdPause = 'library/images/ph_ad_pause.webp';
   static const String imagesPhAdPlay = 'library/images/ph_ad_play.webp';
   static const String imagesPhAiLang = 'library/images/ph_ai_lang.webp';

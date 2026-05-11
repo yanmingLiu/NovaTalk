@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
@@ -9,9 +10,7 @@ import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
 import 'package:novatalk/app/pages/chat/chat_controller.dart';
 import 'package:novatalk/app/pages/chat/chat_room/chat_room_controller.dart';
-import 'package:novatalk/app/pages/chat/role_profile/role_profile_appbar.dart';
 import 'package:novatalk/app/pages/home/home_controller.dart';
-import 'package:novatalk/app/pages/vip/vip_view.dart';
 import 'package:novatalk/app/utils/api_svc.dart';
 import 'package:novatalk/app/utils/clo_util.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
@@ -22,9 +21,6 @@ import '../../../configs/constans.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/common_utils.dart';
 import '../../../utils/storage_util.dart';
-import '../../../widgets/gradient_bound_painter.dart';
-import '../../call/phone_title.dart';
-import '../../home/home_view.dart';
 
 class RoleProfilePage extends StatefulWidget {
   const RoleProfilePage({super.key});
@@ -43,10 +39,10 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
   // bool get isCloB => false;
 
   final ScrollController _scrollController = ScrollController();
-  double _appBarOpacity = 0.0;
 
   final ctr = Get.find<ChatRoomController>();
   List<RoleRecordsImages> images = <RoleRecordsImages>[];
+  _ProfileTabType _selectedTab = _ProfileTabType.info;
 
   @override
   void initState() {
@@ -55,29 +51,20 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
     if (arguments != null && arguments is RoleRecords) {
       role = arguments;
     }
-    _scrollController.addListener(_onScroll);
-
     images = ctr.role.images ?? [];
+    if (isCloB) {
+      _selectedTab = _initialTab;
+    }
 
     ever(ctr.roleImagesChanged, (_) {
       images = ctr.role.images ?? [];
+      _ensureSelectedTabVisible();
       setState(() {});
-    });
-  }
-
-  void _onScroll() {
-    // 根据滚动的偏移量调整透明度（滚动 0 ~ 200）
-    double offset = _scrollController.offset;
-    final maxOffset = Get.width - kToolbarHeight;
-    double opacity = (offset / maxOffset).clamp(0, 1); // 限制透明度在 0 到 1 的范围内
-    setState(() {
-      _appBarOpacity = opacity;
     });
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
@@ -119,6 +106,35 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
     );
   }
 
+  bool get _hasInfo => (role.aboutMe ?? '').trim().isNotEmpty;
+
+  bool get _hasTags => isCloB && (role.tags?.isNotEmpty ?? false);
+
+  bool get _hasPhotos => isCloB && images.isNotEmpty;
+
+  List<_ProfileTabType> get _visibleTabs {
+    return [
+      if (_hasInfo) _ProfileTabType.info,
+      if (_hasTags) _ProfileTabType.tags,
+      if (_hasPhotos) _ProfileTabType.photos,
+    ];
+  }
+
+  _ProfileTabType get _initialTab {
+    final tabs = _visibleTabs;
+    if (isCloB && tabs.contains(_ProfileTabType.tags)) {
+      return _ProfileTabType.tags;
+    }
+    return tabs.firstOrNull ?? _ProfileTabType.info;
+  }
+
+  void _ensureSelectedTabVisible() {
+    final tabs = _visibleTabs;
+    if (tabs.isEmpty || !tabs.contains(_selectedTab)) {
+      _selectedTab = tabs.firstOrNull ?? _ProfileTabType.info;
+    }
+  }
+
   Future _follow() async {
     final id = role.id;
     if (id == null) {
@@ -156,452 +172,425 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: RoleProfileAppBar(
-        role: role,
-        opacity: _appBarOpacity,
-        onClearHistory: _clearHistory,
-        onDelete: _deleteChat,
-        onReport: report,
-      ),
-      extendBodyBehindAppBar: true,
-      bottomNavigationBar: buildBottomNavigationBar(),
-      body: buildDefaultBg(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        top: false,
+        bottom: false,
         child: Stack(
-          clipBehavior: Clip.none,
           children: [
-            Positioned(
-              width: Get.width,
-              height: Get.height / 2.2,
-              child: role.avatar.iv(fit: BoxFit.cover),
-            ),
             Positioned.fill(
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Positioned(
-                        top: -50.h,
-                        child: ClipRRect(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                            child: Container(
-                              height: 60.h,
-                              padding: EdgeInsets.symmetric(
-                                vertical: 10.h,
-                                horizontal: 20.w,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16.r),
-                                  topRight: Radius.circular(16.r),
-                                ),
-                                color: Colors.black.withValues(alpha: 0.4),
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    width: 1.w,
-                                  ),
-                                  right: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    width: 1.w,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Assets.imagesPhPfMsg.iv(width: 16.w),
-                                      10.horizontalSpace,
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            role.sessionCount ?? '0',
-                                            style: tTheme.bodyLarge?.copyWith(
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                          Text(
-                                            LocaleKeys.dialogue.tr,
-                                            style: tTheme.labelMedium?.copyWith(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.75,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  18.horizontalSpace,
-                                  Row(
-                                    children: [
-                                      Assets.imagesIcLike.iv(width: 16.w),
-                                      10.horizontalSpace,
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            role.likes ?? '0',
-                                            style: tTheme.bodyLarge?.copyWith(
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                          Text(
-                                            LocaleKeys.favorite.tr,
-                                            style: tTheme.labelMedium?.copyWith(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.75,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(16.r),
-                            topRight: Radius.circular(16.r),
-                          ),
-                        ),
-                        child: DefaultTabController(
-                          length: isCloB ? 2 : 1,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: 0.51.sw,
-                                          ),
-                                          child: Text(
-                                            role.name ?? '',
-                                            style: tTheme.headlineMedium!
-                                                .copyWith(
-                                                  color: Colors.black,
-                                                  fontSize: 24.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        8.horizontalSpace,
-                                        if (!role.age.isVoid)
-                                          SizedBox(
-                                            width: 27.w,
-                                            child: buildAgeWidget(role.age),
-                                          ).marginOnly(top: 3.h),
-                                      ],
-                                    ),
-                                  ),
-                                  // InkWell(
-                                  //   onTap: _follow,
-                                  //   child: Container(
-                                  //     width: 105.w,
-                                  //     padding: EdgeInsets.symmetric(
-                                  //       vertical: 3.5.h,
-                                  //     ),
-                                  //     decoration: BoxDecoration(
-                                  //       color: role.collect == true
-                                  //           ? Colors.white.withOpacity(0.1)
-                                  //           : Color(0xffE887E9),
-                                  //       borderRadius: BorderRadius.circular(8.r),
-                                  //     ),
-                                  //     child: Row(
-                                  //       mainAxisAlignment: MainAxisAlignment.center,
-                                  //       children: [
-                                  //         isLoading
-                                  //             ? const SizedBox(
-                                  //                 width: 15,
-                                  //                 height: 15,
-                                  //                 child: CircularProgressIndicator(
-                                  //                   color: Colors.white,
-                                  //                   strokeWidth: 1,
-                                  //                 ),
-                                  //               )
-                                  //             : (role.collect == true
-                                  //                       ? Assets.imagesIcLike
-                                  //                       : Assets.imagesIcLike2)
-                                  //                   .iv(width: 20.w),
-                                  //         const SizedBox(width: 8),
-                                  //         Text(
-                                  //           role.collect == true
-                                  //               ? LocaleKeys.liked.tr
-                                  //               : LocaleKeys.like.tr,
-                                  //           style: tTheme.titleMedium?.copyWith(
-                                  //             fontWeight: FontWeight.w500,
-                                  //           ),
-                                  //         ),
-                                  //       ],
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                ],
-                              ).marginSymmetric(horizontal: 20.w),
-                              14.verticalSpace,
-                              Divider(thickness: 4.h, color: Color(0xffFAFAFA)),
-                              7.verticalSpace,
-                              buildTabBar(),
-                              Builder(
-                                builder: (context) {
-                                  final controller = DefaultTabController.of(
-                                    context,
-                                  );
-                                  return IndexedStack(
-                                    index: controller.index,
-                                    children: [
-                                      buildInfoWidget(),
-                                      _buildImages(),
-                                    ],
-                                  );
-                                },
-                              ),
-                              120.verticalSpace,
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        right: 12.h,
-                        top: -45.h,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: cTheme.scrim,
-                              width: 1.5.w,
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: role.avatar.iv(
-                              width: 87.w,
-                              height: 87.w,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ).paddingOnly(top: 138.h),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: EdgeInsets.only(bottom: 28.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHero(),
+                    16.verticalSpace,
+                    _buildNameLine(),
+                    22.verticalSpace,
+                    _buildStatsCard(),
+                    20.verticalSpace,
+                    _buildActions(),
+                    20.verticalSpace,
+                    _buildProfileTabs(),
+                    12.verticalSpace,
+                    _buildTabContent(),
+                  ],
                 ),
               ),
             ),
+            _buildTopControls(),
           ],
         ),
       ),
     );
   }
 
-  Widget buildTabBar() {
-    if (isCloB) {
-      return Container(
-        width: Get.width / 1.5,
-        height: 50.h,
-        margin: EdgeInsets.only(bottom: 5.h),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              left: -6.w,
-              child: buildHomeTabBar(
-                // isScrollable: false,
-                tabAlignment: TabAlignment.start,
-                kOffset: Offset(0, -10.h),
-                labelStyle: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
+  Widget _buildHero() {
+    return SizedBox(
+      height: 246.h,
+      width: double.infinity,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: ClipPath(
+              clipper: _RoleProfileHeroClipper(),
+              child: SizedBox(
+                height: 200.h,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildCoverImage(),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.48),
+                            Colors.black.withValues(alpha: 0.48),
+                            Colors.black.withValues(alpha: 0),
+                          ],
+                          stops: const [0, 0.63, 0.72],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                unselectedLabelStyle: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black.withValues(alpha: 0.75),
-                ),
-                tabs: [
-                  Tab(text: LocaleKeys.info.tr),
-                  Tab(text: LocaleKeys.moment.tr),
-                ],
-                onTap: (index) {
-                  setState(() {});
-                },
               ),
             ),
-          ],
-        ),
-      );
-    }
-    return sh;
-    // return SizedBox(
-    //   height: 50.h,
-    //   width: Get.width,
-    //   child: Stack(
-    //     clipBehavior: Clip.none,
-    //     children: [
-    //       Positioned(
-    //         left: -15.w,
-    //         child: buildHomeTabBar(tabs: [Tab(text: LocaleKeys.info.tr)]),
-    //       ),
-    //     ],
-    //   ),
-    // );
+          ),
+          Positioned(
+            top: 154.h,
+            child: Container(
+              width: 92.w,
+              height: 92.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: Colors.white, width: 2.w),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18.r),
+                child: role.avatar.iv(fit: BoxFit.cover),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildTags() {
-    if (!CloUtil.isCloB || role.tags == null || role.tags?.isEmpty == true) {
-      return const SizedBox();
+  Widget _buildCoverImage() {
+    final cover = role.media?.characterImages?.firstOrNull ?? role.avatar;
+    if (cover.isVoid) {
+      return const ColoredBox(color: Colors.black);
     }
-    final tags = role.tags!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return cover.iv(width: double.infinity, height: 200.h, fit: BoxFit.cover);
+  }
+
+  Widget _buildTopControls() {
+    return Positioned(
+      left: 16.w,
+      right: 16.w,
+      top: 55.h,
+      child: Row(
+        children: [
+          TapBox(
+            onTap: Get.back,
+            child: buildBackIcon(color: Colors.white),
+          ),
+          const Spacer(),
+          if (isCloB) _buildMoreMenu(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoreMenu() {
+    void tapMenu(Function? onTap) {
+      Navigator.of(Get.context!).pop();
+      onTap?.call();
+    }
+
+    return CustomPopup(
+      showArrow: false,
+      rootNavigator: true,
+      contentPadding: EdgeInsets.zero,
+      content: Container(
+        padding: EdgeInsets.symmetric(vertical: 4.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 25.w),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TapBox(
+                    onTap: () => tapMenu(_clearHistory),
+                    padding: EdgeInsets.all(5.r),
+                    child: LocaleKeys.cleHistory.tv(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                  TapBox(
+                    onTap: () => tapMenu(report),
+                    padding: EdgeInsets.all(5.r),
+                    child: LocaleKeys.report.tv(
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 150.w,
+              child: Divider(
+                height: 10.h,
+                thickness: 4.h,
+                color: const Color(0xffFAFAFA),
+              ),
+            ),
+            TapBox(
+              onTap: () => tapMenu(_deleteChat),
+              padding: EdgeInsets.all(5.r),
+              child: LocaleKeys.remChat.tv(
+                style: TextStyle(
+                  color: const Color(0xffE2266C),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+            4.verticalSpace,
+          ],
+        ),
+      ),
+      child: _CircleIconButton(
+        child: Assets.imagesPhMore.iv(width: 3.w, height: 13.h),
+      ),
+    );
+  }
+
+  Widget _buildNameLine() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              role.name ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22.sp,
+                height: 1.2,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Montserrat',
+              ),
+            ),
+          ),
+          8.horizontalSpace,
+          if (role.age != null) _AgeBadge(text: '${role.age}'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsCard() {
+    return Container(
+      width: 303.w,
+      height: 58.h,
+      padding: EdgeInsets.symmetric(horizontal: 52.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _StatItem(value: role.sessionCount ?? '0', label: 'Dialogue'),
+          Container(
+            width: 1.w,
+            height: 32.h,
+            color: Colors.white.withValues(alpha: 0.1),
+          ),
+          _StatItem(value: role.likes ?? '0', label: LocaleKeys.favorite.tr),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActions() {
+    final liked = role.collect == true;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        8.verticalSpace,
-        Text(
-          LocaleKeys.tags.tr,
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: Color(0xff434343),
-            fontWeight: FontWeight.w500,
+        TapBox(
+          onTap: () async {
+            SmartDialog.showLoading();
+            await _follow();
+            SmartDialog.dismiss();
+          },
+          child: _PillButton(
+            text: liked ? LocaleKeys.liked.tr : LocaleKeys.like.tr,
+            selected: liked,
+            filledSelected: isCloB,
+            loading: isLoading,
           ),
         ),
-        8.verticalSpace,
-        Wrap(
-          spacing: 8.w,
-          runSpacing: 8.w,
-          children: tags
-              .map(
-                (e) => buildRoleTagsWidget(
-                  textWidget: e.tv(
-                    style: tTheme.bodySmall?.copyWith(color: Color(0xff595959)),
-                  ),
-                ),
-              )
-              .toList(),
+        21.horizontalSpace,
+        TapBox(
+          onTap: () {
+            Get.popTo(Routes.CHAT_ROOM);
+          },
+          child: _PillButton(text: LocaleKeys.chat.tr),
         ),
       ],
     );
   }
 
-  Widget _buildImages() {
-    if (!CloUtil.isCloB || images.isEmpty) {
+  Widget _buildProfileTabs() {
+    final tabs = _visibleTabs;
+    if (tabs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < tabs.length; i++) ...[
+              TapBox(
+                onTap: () {
+                  setState(() {
+                    _selectedTab = tabs[i];
+                  });
+                },
+                child: _ProfileTabLabel(
+                  text: tabs[i].title,
+                  selected: _selectedTab == tabs[i],
+                ),
+              ),
+              if (i < tabs.length - 1) 40.horizontalSpace,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent() {
+    _ensureSelectedTabVisible();
+    switch (_selectedTab) {
+      case _ProfileTabType.info:
+        return buildInfoWidget();
+      case _ProfileTabType.tags:
+        return _buildTags();
+      case _ProfileTabType.photos:
+        return _buildImages();
+    }
+  }
+
+  Widget buildTabBar() {
+    return _buildProfileTabs();
+  }
+
+  Widget _buildTags() {
+    if (!isCloB || role.tags == null || role.tags?.isEmpty == true) {
       return const SizedBox();
     }
-    final imageCount = images.length;
+    final tags = role.tags!;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Wrap(
+        spacing: 8.w,
+        runSpacing: 8.h,
+        children: tags.map(_buildTagChip).toList(),
+      ),
+    );
+  }
+
+  Widget _buildImages() {
+    if (!isCloB || images.isEmpty) {
+      return const SizedBox();
+    }
     return Obx(() {
       ctr.roleImagesChanged.value;
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 12.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(16.r)),
-          border: Border.all(color: Color(0xffFFE588).withValues(alpha: 0.15)),
-        ),
+      final imageCount = images.length;
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: GridView.builder(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            childAspectRatio: 1,
-            crossAxisSpacing: 8.w,
-            mainAxisSpacing: 8.w,
+            crossAxisCount: 2,
+            childAspectRatio: 168 / 224,
+            crossAxisSpacing: 7.w,
+            mainAxisSpacing: 7.h,
           ),
           itemCount: imageCount,
           itemBuilder: (_, idx) {
             final image = images[idx];
             final unlocked = image.unlocked ?? false;
             return ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(12.r)),
-              child: SizedBox(
-                height: 65.w,
-                width: 65.w,
-                child: Stack(
-                  children: [
+              borderRadius: BorderRadius.all(Radius.circular(8.r)),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: () {
+                        ctr.onTapImage(image);
+                      },
+                      child: image.imageUrl.iv(fit: BoxFit.cover),
+                    ),
+                  ),
+                  if (!unlocked)
                     Positioned.fill(
                       child: GestureDetector(
-                        onTap: () {
-                          ctr.onTapImage(image);
+                        onTap: () async {
+                          ctr.onTapUnlockImage(image);
                         },
-                        child: image.imageUrl.iv(),
-                      ),
-                    ),
-                    if (!unlocked)
-                      Positioned.fill(
-                        child: GestureDetector(
-                          onTap: () async {
-                            ctr.onTapUnlockImage(image);
-                          },
-                          child: Stack(
-                            children: [
-                              BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 15,
-                                  sigmaY: 15,
-                                ),
-                                child: Container(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                              child: Container(
+                                color: Colors.black.withValues(alpha: 0.5),
                               ),
-                              Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      height: 20,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Assets.imagesIcGem.iv(
-                                            width: 20,
-                                            height: 20,
-                                          ),
-                                          2.horizontalSpace,
-                                          Text(
-                                            '${image.gems ?? 0}',
-                                            style: tTheme.bodyMedium!.copyWith(
-                                              color: Colors.white,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                            ),
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Assets.imagesIcGem.iv(
+                                    width: 20.w,
+                                    height: 20.w,
+                                  ),
+                                  2.horizontalSpace,
+                                  Text(
+                                    '${image.gems ?? 0}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14.sp,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             );
           },
@@ -611,102 +600,328 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
   }
 
   Widget buildInfoWidget() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            LocaleKeys.profileOverview.tr,
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: Color(0xff434343),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          8.verticalSpace,
-          Text(
             role.aboutMe ?? '',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Color(0xff595959),
+              color: Colors.white,
               fontWeight: FontWeight.w400,
+              height: 1.35,
             ),
           ),
-          10.verticalSpace,
-          _buildTags(),
         ],
       ),
     );
   }
 
   Widget buildBottomNavigationBar() {
-    return SafeArea(
-      child: Container(
-        height: 85.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            top: BorderSide(
-              color: Colors.black.withValues(alpha: 0.05),
-              width: 1.0,
-            ),
-          ),
+    return const SizedBox.shrink();
+  }
+}
+
+class _RoleProfileHeroClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final radius = 58 * size.width / 375;
+    return Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height - radius)
+      ..quadraticBezierTo(
+        size.width,
+        size.height,
+        size.width - radius,
+        size.height,
+      )
+      ..lineTo(0, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+enum _ProfileTabType {
+  info,
+  tags,
+  photos;
+
+  String get title {
+    switch (this) {
+      case _ProfileTabType.info:
+        return LocaleKeys.info.tr;
+      case _ProfileTabType.tags:
+        return LocaleKeys.tags.tr;
+      case _ProfileTabType.photos:
+        return LocaleKeys.photos.tr;
+    }
+  }
+}
+
+class _CircleIconButton extends StatelessWidget {
+  const _CircleIconButton({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24.w,
+      height: 24.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFF131711).withValues(alpha: 0.30),
+        borderRadius: BorderRadius.circular(13.r),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.70),
+          width: 0.6,
         ),
-        child: Center(
-          child: Container(
-            height: 44.h,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TapBox(
-                    onTap: () async {
-                      SmartDialog.showLoading();
-                      await _follow();
-                      SmartDialog.dismiss();
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(22.r)),
-                        color: Colors.white.withValues(alpha: 0.1),
-                        border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          width: 1.0,
-                        ),
-                      ),
-                      child:
-                          (role.collect == true
-                                  ? LocaleKeys.followed
-                                  : LocaleKeys.follow)
-                              .tv(
-                                style: tTheme.titleMedium!.copyWith(
-                                  color: Colors.black,
-                                ),
-                              ),
-                    ),
-                  ),
-                ),
-                11.horizontalSpace,
-                Expanded(
-                  flex: 4,
-                  child: buildTheme3Btn(
-                    alignment: Alignment.center,
-                    title: LocaleKeys.chat.tr,
-                    onTap: () {
-                      Get.popTo(Routes.CHAT_ROOM);
-                    },
-                  ),
-                ),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.25),
+            blurRadius: 4.r,
           ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _AgeBadge extends StatelessWidget {
+  const _AgeBadge({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(minWidth: 33.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+          stops: [0.058, 0.922],
+        ),
+        borderRadius: BorderRadius.circular(24.r),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 14.sp,
+          height: 1.15,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Montserrat',
         ),
       ),
     );
   }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 57.w,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              height: 1.2,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Montserrat',
+            ),
+          ),
+          2.verticalSpace,
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 14.sp,
+              height: 1.2,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PillButton extends StatelessWidget {
+  const _PillButton({
+    required this.text,
+    this.selected = false,
+    this.filledSelected = true,
+    this.loading = false,
+  });
+
+  final String text;
+  final bool selected;
+  final bool filledSelected;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(24.r);
+    final selectedFilled = selected && filledSelected;
+    final selectedOutlined = selected && !filledSelected;
+    return Container(
+      width: 92.w,
+      height: 32.h,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: selected
+            ? Colors.transparent
+            : Colors.white.withValues(alpha: 0.15),
+        gradient: selectedFilled
+            ? const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+                stops: [0.058, 0.922],
+              )
+            : null,
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: selectedOutlined || (selected && loading)
+              ? const Color(0xFFFF96F7)
+              : Colors.transparent,
+        ),
+      ),
+      child: loading
+          ? SizedBox(
+              width: 14.w,
+              height: 14.w,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5.w,
+                color: selectedFilled ? Colors.black : Colors.white,
+              ),
+            )
+          : Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selectedFilled
+                    ? Colors.black
+                    : selectedOutlined
+                    ? const Color(0xFFFF96F7)
+                    : Colors.white,
+                fontSize: 14.sp,
+                height: 1.2,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+    );
+  }
+}
+
+class _ProfileTabLabel extends StatelessWidget {
+  const _ProfileTabLabel({required this.text, required this.selected});
+
+  final String text;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!selected) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.7),
+          fontSize: 14.sp,
+          height: 1.2,
+          fontWeight: FontWeight.w400,
+        ),
+      );
+    }
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: 0,
+          bottom: 0,
+          child: Container(
+            width: 12.w,
+            height: 12.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.r),
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  const Color(0xFFFF96F7),
+                  const Color(0xFFFF96F7).withValues(alpha: 0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.sp,
+            height: 1.2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Widget _buildTagChip(String text) {
+  return Container(
+    width: 109.w,
+    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: const Color(0xFFFF96F7).withValues(alpha: 0.2),
+      borderRadius: BorderRadius.circular(8.r),
+    ),
+    child: Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: const Color(0xFFFF96F7),
+        fontSize: 14.sp,
+        height: 1.2,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+  );
 }
 
 void collectShowHelpUs(String roleId) {

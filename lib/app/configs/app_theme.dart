@@ -611,11 +611,11 @@ Widget buildBackIcon({Color? color}) {
         borderRadius: BorderRadius.circular(13.r),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.70),
-          width: 0.6,
+          width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: 0.20),
+            color: Colors.white.withValues(alpha: 0.25),
             blurRadius: 4,
           ),
         ],

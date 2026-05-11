@@ -381,97 +381,165 @@ class SettingView extends GetBuildView<SettingController> {
     final nicknameController = TextEditingController();
 
     await Get.bottomSheet(
-      buildTheme2SheetRootWidget(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            LocaleKeys.yourNickname.tv(
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            16.verticalSpace,
-            Container(
-              height: 42.h,
-              constraints: BoxConstraints(minHeight: 120.h),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: cTheme.scrim, width: 1),
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xffFFFBD8), Colors.white, Colors.white],
-                ),
-              ),
-              child: TextField(
-                maxLines: 1,
-                autofocus: true,
-                controller: nicknameController,
-                style: tTheme.bodyLarge!.copyWith(color: Colors.black),
-                decoration: InputDecoration(
-                  hintText:
-                      AppUser.inst.user?.nickname ?? LocaleKeys.screenName.tr,
-                  hintStyle: tTheme.bodyLarge!.copyWith(
-                    color: const Color(0xff1C1A1D).withValues(alpha: 0.25),
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 5,
-                  ),
-                ),
-              ),
-            ),
-            12.verticalSpace,
-            SafeArea(
-              child: Row(
-                children: [
-                  buildTheme3Btn(
-                    title: LocaleKeys.cancel.tr,
-                    onTap: () => Get.closeBottomSheet(),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22.r),
-                      border: Border.all(
-                        color: const Color(0xff1C1A1D),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  11.horizontalSpace,
-                  Expanded(
-                    flex: 2,
-                    child: buildTheme3Btn(
-                      alignment: Alignment.center,
-                      title: LocaleKeys.done.tr,
-                      onTap: () async {
-                        final newNickname = nicknameController.text.trim();
-                        if (newNickname.isEmpty) {
-                          SmartDialog.showToast(LocaleKeys.nameEmpty.tr);
-                          return;
-                        }
-                        Get.closeBottomSheet();
-                        controller.changeNickName(newNickname);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ).paddingSymmetric(horizontal: 12.w, vertical: 16.h),
+      _EditNicknameSheet(
+        controller: nicknameController,
+        hintText: AppUser.inst.user?.nickname ?? LocaleKeys.screenName.tr,
+        onConfirm: () {
+          final newNickname = nicknameController.text.trim();
+          if (newNickname.isEmpty) {
+            SmartDialog.showToast(LocaleKeys.nameEmpty.tr);
+            return;
+          }
+          Get.closeBottomSheet();
+          controller.changeNickName(newNickname);
+        },
       ),
-      isScrollControlled: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+    nicknameController.dispose();
+  }
+}
+
+class _EditNicknameSheet extends StatelessWidget {
+  const _EditNicknameSheet({
+    required this.controller,
+    required this.hintText,
+    required this.onConfirm,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final VoidCallback onConfirm;
+
+  static const _fieldColor = Color(0xfff7f7f7);
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: double.infinity,
+            height: 240.h,
+            padding: EdgeInsets.only(left: 16.w, top: 20.h, right: 16.w),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xffffdffd), Colors.white],
+                stops: [0.067, 0.593],
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
+              ),
+            ),
+            child: Column(
+              children: [
+                LocaleKeys.yourNickname.tv(
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                ),
+                24.verticalSpace,
+                Container(
+                  height: 52.h,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _fieldColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: TextField(
+                    controller: controller,
+                    autofocus: true,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => onConfirm(),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
+                    ),
+                    cursorColor: Colors.black,
+                    cursorHeight: 16.h,
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      hintText: hintText,
+                      hintStyle: TextStyle(
+                        color: const Color(0xff808080),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        height: 1.2,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+                    ),
+                  ),
+                ),
+                32.verticalSpace,
+                _NicknameConfirmButton(onTap: onConfirm),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 16.w,
+            top: -44.h,
+            child: TapBox(
+              onTap: () => Get.closeBottomSheet(),
+              child: buildCloseIcon(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NicknameConfirmButton extends StatelessWidget {
+  const _NicknameConfirmButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TapBox(
+      onTap: onTap,
+      child: Container(
+        width: 250.w,
+        height: 44.h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xffffdffd), Color(0xffff96f7)],
+            stops: [0.058, 0.922],
+          ),
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        child: LocaleKeys.done.tv(
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            height: 1.2,
+          ),
+        ),
+      ),
     );
   }
 }
