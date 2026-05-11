@@ -305,20 +305,24 @@ class _RoleProfilePageState extends State<RoleProfilePage> {
     }) {
       return TapBox(
         onTap: onTap,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            icon.iv(width: 24, color: color ?? Colors.white),
-            4.horizontalSpace,
-            text.tv(
-              style: TextStyle(
-                color: color ?? Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
+
+        child: Container(
+          height: 40,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon.iv(width: 24, color: color ?? Colors.white),
+              4.horizontalSpace,
+              text.tv(
+                style: TextStyle(
+                  color: color ?? Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
