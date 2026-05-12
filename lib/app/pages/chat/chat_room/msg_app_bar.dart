@@ -1,11 +1,10 @@
-import 'package:novatalk/app/utils/clo_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:novatalk/app/entities/role_entity.dart';
+import 'package:novatalk/app/pages/chat/chat_room/chat_level.dart';
 import 'package:novatalk/app/pages/chat/chat_room/chat_room_controller.dart';
 import 'package:novatalk/app/widgets/common_widget.dart';
 
@@ -16,9 +15,6 @@ import '../../../routes/app_pages.dart';
 import '../../../utils/app_user.dart';
 import '../../../utils/common_utils.dart';
 import '../../../utils/log/log_event.dart';
-import 'chat_level.dart';
-import 'chat_room_view.dart';
-import 'k_gem_btn.dart';
 
 class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MsgAppBar({super.key, required this.role, required this.ctr});
@@ -38,91 +34,138 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: false,
       titleSpacing: 0,
-      leadingWidth: 35.w,
-      leading: Align(
-        alignment: Alignment.centerLeft,
-        child: TapBox(
-          onTap: () {
-            Get.back();
-          },
-          child: buildBackIcon(),
-        ).marginOnly(left: 12.w),
-      ),
-      title: TapBox(
-        onTap: () {
-          Get.toNamed(Routes.ROLE_PROFILE, arguments: role);
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            8.horizontalSpace,
-            if (role.avatar != null)
-              SizedBox.square(
-                dimension: 36.r,
-                child: ClipOval(child: role.avatar.iv()),
-              ).marginOnly(right: 8.w),
-            Flexible(
-              child: Text(
-                role.name ?? '',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: tTheme.titleLarge,
-              ),
+      leadingWidth: 0,
+      leading: SizedBox.shrink(),
+      title: Row(
+        crossAxisAlignment: .center,
+        spacing: 8,
+        children: [
+          SizedBox(width: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(36.r),
+            child: Stack(
+              children: [
+                role.avatar.iv(fit: .cover, width: 36, height: 36),
+                Obx(() {
+                  final data = ctr.chatLevel.value;
+                  if (data == null) {
+                    return const SizedBox();
+                  }
+
+                  var level = data.level ?? 1;
+                  return Container(
+                    color: Color(0x66000000),
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 2,
+                      children: [
+                        Text(
+                          'Lvl $level',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFFF96F7),
+                          ),
+                        ),
+                        if (role.videoChat == true)
+                          Assets.imagesIcVideo.iv(height: 16),
+                      ],
+                    ),
+                  );
+                }),
+              ],
             ),
-            if (role.age != null)
-              Container(
-                margin: EdgeInsets.only(left: 12.w,right: 8.w),
-                padding: EdgeInsets.symmetric(horizontal: 5.w),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    width: 1.w,
+          ),
+          Expanded(
+            child: Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(Routes.ROLE_PROFILE, arguments: role);
+                  },
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          role.name ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      if (!role.age.isVoid)
+                        Container(
+                          margin: EdgeInsets.only(left: 4.w),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 1.h,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24.r),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Color(0xFFFFDFFD), Color(0xFFFF96F7)],
+                            ),
+                          ),
+                          child: role.age.tv(
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(12.w),
                 ),
-                child: Text(
-                  '${role.age}',
-                  style: tTheme.labelMedium?.copyWith(color: cTheme.primary),
-                ),
-              ),
-          ],
-        ),
+                SizedBox(height: 8.h),
+                ChatLevel(),
+              ],
+            ),
+          ),
+        ],
       ),
       actions: [
         TapBox(
           onTap: () {
             showChatLevel();
           },
-          child: Assets.imagesPhGoodMood.iv(height: 28.h),
+          child: Assets.imagesPhGoodMood.iv(height: 24.h),
         ).marginOnly(right: 16.w),
-        // if (CloUtil.isCloB)
-          TapBox(
-            onTap: () {
-              logEvent('c_call');
-              if (!AppUser.inst.isVip.value) {
-                pushVip(VipFrom.call);
-                return;
-              }
+        TapBox(
+          onTap: () {
+            logEvent('c_call');
+            if (!AppUser.inst.isVip.value) {
+              pushVip(VipFrom.call);
+              return;
+            }
 
-              if (!AppUser.inst.isBalanceEnough(ConsumeFrom.call)) {
-                pushGem(ConsumeFrom.call);
-                return;
-              }
+            if (!AppUser.inst.isBalanceEnough(ConsumeFrom.call)) {
+              pushGem(ConsumeFrom.call);
+              return;
+            }
 
-              final sessionId = ctr.session.id;
-              if (sessionId == null) {
-                return;
-              }
-              pushPhone(
-                sessionId: sessionId.toInt,
-                role: role,
-                showVideo: false,
-              );
-            },
-            child: Assets.imagesPhCall.iv(height: 28.h),
-          ).marginOnly(right: 12.w),
-        // const KGemBtn(from: ConsumeFrom.chat),
-        // 14.horizontalSpace
+            final sessionId = ctr.session.id;
+            if (sessionId == null) {
+              return;
+            }
+            pushPhone(sessionId: sessionId.toInt, role: role, showVideo: false);
+          },
+          child: Assets.imagesPhCall.iv(height: 24.h),
+        ).marginOnly(right: 12.w),
+        TapBox(
+          onTap: () => Get.back(),
+          child: Assets.imagesIcCloseOri.iv(height: 24.h),
+        ).marginOnly(right: 16.w),
       ],
     );
   }
@@ -139,7 +182,7 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
         height: 48.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color:bgColor,
+          color: bgColor,
           borderRadius: BorderRadius.circular(12.w),
         ),
         child: Column(
@@ -151,7 +194,13 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
             5.verticalSpace,
             LocaleKeys.level
                 .trParams({"n": "$level"})
-                .tv(style: TextStyle(fontSize: 14.sp,fontWeight:  FontWeight.w400,color:  Colors.black)),
+                .tv(
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
             5.verticalSpace,
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -173,10 +222,30 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     final tips = [
-      (level: 1, gemNum: 10, icon: '👋',bgColor:Color(0xffFBF05D).withValues(alpha: 0.1)),
-      (level: 2, gemNum: 20, icon: '🥱', bgColor:Color(0xffFBF05D).withValues(alpha: 0.2)),
-      (level: 3, gemNum: 30, icon: '😊', bgColor:Color(0xffFBF05D).withValues(alpha: 0.3)),
-      (level: 4, gemNum: 40, icon: '💓',bgColor:Color(0xffFBF05D).withValues(alpha: 0.4)),
+      (
+        level: 1,
+        gemNum: 10,
+        icon: '👋',
+        bgColor: Color(0xffFBF05D).withValues(alpha: 0.1),
+      ),
+      (
+        level: 2,
+        gemNum: 20,
+        icon: '🥱',
+        bgColor: Color(0xffFBF05D).withValues(alpha: 0.2),
+      ),
+      (
+        level: 3,
+        gemNum: 30,
+        icon: '😊',
+        bgColor: Color(0xffFBF05D).withValues(alpha: 0.3),
+      ),
+      (
+        level: 4,
+        gemNum: 40,
+        icon: '💓',
+        bgColor: Color(0xffFBF05D).withValues(alpha: 0.4),
+      ),
     ];
     // Theme1Dialog.showGroup(
     //   child: Column(
@@ -207,10 +276,15 @@ class MsgAppBar extends StatelessWidget implements PreferredSizeWidget {
       showCancel: false,
       child: Column(
         children: [
-          LocaleKeys.upLevel.tv(
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500,
-              color: Colors.black,),
-          ).marginSymmetric(vertical: 16.h),
+          LocaleKeys.upLevel
+              .tv(
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              )
+              .marginSymmetric(vertical: 16.h),
           GridView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.symmetric(horizontal: 12.w),

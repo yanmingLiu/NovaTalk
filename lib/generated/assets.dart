@@ -53,6 +53,7 @@ class Assets {
   static const String imagesIcPictureClear = 'library/images/ic_picture_clear.webp';
   static const String imagesIcReport = 'library/images/ic_report.webp';
   static const String imagesIcSearch = 'library/images/ic_search.webp';
+  static const String imagesIcVideo = 'library/images/ic_video.webp';
   static const String imagesIcVip = 'library/images/ic_vip.webp';
   static const String imagesPhAdPause = 'library/images/ph_ad_pause.webp';
   static const String imagesPhAdPlay = 'library/images/ph_ad_play.webp';

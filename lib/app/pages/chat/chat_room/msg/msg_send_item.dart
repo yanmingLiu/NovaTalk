@@ -39,16 +39,14 @@ class MsgSendItem extends StatelessWidget {
                     ),
                     constraints: BoxConstraints(maxWidth: Get.width * 0.8),
                     decoration: BoxDecoration(
-                      color: Color(0xffB0ECFD),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        topRight: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
-                      ),
+                      color: Color(0xFFFFDFFD),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       sendText ?? '',
-                      style: tTheme.bodyLarge?.copyWith(color: Color(0xff1A1A1A)),
+                      style: tTheme.bodyLarge?.copyWith(
+                        color: Color(0xff1A1A1A),
+                      ),
                     ),
                   ),
                 ],

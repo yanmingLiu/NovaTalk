@@ -61,13 +61,13 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
       _startAudioPlay();
     }
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       AudioPlayerUtil.instance.stopAll();
     }
   }
-
 
   @override
   void dispose() {
@@ -213,7 +213,7 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
         : EdgeInsets.all(12.w);
 
     final borderRadius = hasVoice
-        ? BorderRadius.circular(16)
+        ? BorderRadius.circular(12)
         : const BorderRadius.only(
             topLeft: Radius.circular(2),
             topRight: Radius.circular(16),
@@ -224,7 +224,7 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
     final margin = hasVoice ? const EdgeInsets.only(top: 15) : EdgeInsets.zero;
 
     final msg = widget.msg;
-    var showTransBtn = false;
+    // var showTransBtn = false;
 
     // if (AccountUtil().user?.autoTranslate == true) {
     //   showTransBtn = false;
@@ -241,7 +241,6 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
     final content = msg.answer ?? '';
     final translate = msg.translateAnswer ?? content;
 
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
@@ -252,7 +251,7 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
             SBlurBackground(
               blur: 50,
               borderRadius: borderRadius,
-              backgroundColor: Color(0xff212121).withValues(alpha: 0.7),
+              backgroundColor: Color(0x80262626),
               child: Container(
                 padding: padding,
                 margin: margin,
@@ -284,9 +283,13 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
             spacing: 16,
             children: [
               // 只有最后一条消息才显示这3个按钮 并且判断 msg.source
-              if (widget.msg == widget.ctr.pageData.lastOrNull) _buildMsgActions(msg),
+              if (widget.msg == widget.ctr.pageData.lastOrNull)
+                _buildMsgActions(msg),
               if (!CloUtil.isCloB)
-                GestureDetector(onTap: report, child: Assets.imagesPhMgReport.iv(width: 40.w)),
+                GestureDetector(
+                  onTap: report,
+                  child: Assets.imagesPhMgReport.iv(width: 24),
+                ),
             ],
           ),
       ],
@@ -312,13 +315,13 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
         // 续写
         InkWell(
           splashColor: Colors.transparent,
-          child: Assets.imagesPhMgWrite.iv(width: 52.w),
+          child: Assets.imagesPhMgWrite.iv(width: 48, height: 24),
           onTap: () => widget.ctr.continueMsg(),
         ),
         if (hasEditAndRefresh) ...[
           InkWell(
             splashColor: Colors.transparent,
-            child: Assets.imagesPhMgEdit.iv(width: 40.w),
+            child: Assets.imagesPhMgEdit.iv(width: 24, height: 24),
             onTap: () {
               showEditContentSheet(
                 defTxt: widget.msg.answer,
@@ -331,18 +334,15 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
           ),
           InkWell(
             splashColor: Colors.transparent,
-            child: Assets.imagesPhMgRefresh.iv(width: 40.w),
+            child: Assets.imagesPhMgRefresh.iv(width: 24, height: 24),
             onTap: () {
               widget.ctr.refreshMsg(msg);
             },
           ),
-
         ],
       ],
     );
   }
-
-
 
   Widget _buildPlayButton() {
     return TapBox(
@@ -353,7 +353,7 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
           height: 25,
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color:Color(0xff262008),
+            color: Color(0xff262008),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(8.w),
               topRight: Radius.circular(8.w),
@@ -393,13 +393,19 @@ class _MsgTextItemState extends State<MsgTextItem> with WidgetsBindingObserver {
     Widget icon;
     switch (_playState) {
       case PlayState.none:
-        icon = Icon(Icons.play_arrow,size: 18.w,color: cTheme.primary);
+        icon = Icon(Icons.play_arrow, size: 18.w, color: cTheme.primary);
         break;
       case PlayState.downloading:
-        icon = LoadingAnimationWidget.inkDrop(color: cTheme.primary, size: 10.w);
+        icon = LoadingAnimationWidget.inkDrop(
+          color: cTheme.primary,
+          size: 10.w,
+        );
         break;
       case PlayState.playing:
-        icon = LoadingAnimationWidget.staggeredDotsWave(color: cTheme.primary, size: 20.w);
+        icon = LoadingAnimationWidget.staggeredDotsWave(
+          color: cTheme.primary,
+          size: 20.w,
+        );
         break;
     }
     return icon;

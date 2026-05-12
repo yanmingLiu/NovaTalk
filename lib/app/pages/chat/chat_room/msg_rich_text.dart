@@ -1,5 +1,4 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:novatalk/app/configs/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -29,7 +28,7 @@ class MsgRichText extends StatelessWidget {
     );
 
     final highlightSetyle = TextStyle(
-      color: Color(0xffF8EE7A),
+      color: Color(0xFFFF96F7),
       fontSize: 14.sp,
       fontWeight: FontWeight.bold,
       height: 1.3,
@@ -42,15 +41,22 @@ class MsgRichText extends StatelessWidget {
     exp.allMatches(text).forEach((match) {
       if (match.start > lastMatchEnd) {
         spans.add(
-          TextSpan(text: text.substring(lastMatchEnd, match.start), style: nomarlStyel),
+          TextSpan(
+            text: text.substring(lastMatchEnd, match.start),
+            style: nomarlStyel,
+          ),
         );
       }
-      spans.add(TextSpan(text: ' *${match.group(1)!}* ', style: highlightSetyle));
+      spans.add(
+        TextSpan(text: ' *${match.group(1)!}* ', style: highlightSetyle),
+      );
       lastMatchEnd = match.end;
     });
 
     if (lastMatchEnd < text.length) {
-      spans.add(TextSpan(text: text.substring(lastMatchEnd), style: nomarlStyel));
+      spans.add(
+        TextSpan(text: text.substring(lastMatchEnd), style: nomarlStyel),
+      );
     }
 
     // 如果不需要动画，直接返回RichText
